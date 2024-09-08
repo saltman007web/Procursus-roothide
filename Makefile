@@ -414,8 +414,8 @@ ifeq ($(UNAME),Linux)
 ifneq ($(MEMO_QUIET),1)
 $(warning Building on GNU Linux)
 endif # ($(MEMO_QUIET),1)
-TARGET_SYSROOT  ?= $(HOME)/cctools/SDK/$(BARE_PLATFORM).sdk
-MACOSX_SYSROOT  ?= $(HOME)/cctools/SDK/MacOSX.sdk
+TARGET_SYSROOT  ?= $(HOME)/procursus_utils/SDKs/$(BARE_PLATFORM).sdk
+MACOSX_SYSROOT  ?= $(HOME)/procursus_utils/SDKs/MacOSX.sdk
 
 CC       := $(GNU_HOST_TRIPLE)-clang
 CXX      := $(GNU_HOST_TRIPLE)-clang++
