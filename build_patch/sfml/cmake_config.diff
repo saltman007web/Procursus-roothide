@@ -1,0 +1,14 @@
+diff --git a/cmake/Config.cmake b/cmake/Config.cmake
+index 48bf1d03..8e53b360 100644
+--- a/cmake/Config.cmake
++++ b/cmake/Config.cmake
+@@ -43,6 +43,9 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+     if(IOS)
+         set(SFML_OS_IOS 1)
+
++        # use the OpenGL ES implementation on iOS
++        set(OPENGL_ES 1)
++    elseif(PROCURSUS)
+         # use the OpenGL ES implementation on iOS
+         set(OPENGL_ES 1)
+     else()
