@@ -1658,8 +1658,8 @@ endif
 endif
 
 ifneq ($(MEMO_QUIET),1)
-	@echo Makeflags: $(MAKEFLAGS)
-	@echo Path: $(PATH)
+	@echo "Makeflags: $(MAKEFLAGS)"
+	@echo "Path: $(PATH)"
 endif # ($(MEMO_QUIET),1)
 
 clean::
