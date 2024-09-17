@@ -1,0 +1,13 @@
+diff --git a/include/SFML/Window/WindowHandle.hpp b/include/SFML/Window/WindowHandle.hpp
+index 36da3bbf..0443e8cd 100644
+--- a/include/SFML/Window/WindowHandle.hpp
++++ b/include/SFML/Window/WindowHandle.hpp
+@@ -42,7 +42,7 @@ namespace sf
+     // Window handle is HWND (HWND__*) on Windows
+     typedef HWND__* WindowHandle;
+
+-#elif defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_FREEBSD) || defined(SFML_SYSTEM_OPENBSD) || defined(SFML_SYSTEM_NETBSD)
++#elif defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_FREEBSD) || defined(SFML_SYSTEM_OPENBSD) || defined(SFML_SYSTEM_NETBSD) || defined(PROCURSUS)
+
+     // Window handle is Window (unsigned long) on Unix - X11
+     typedef unsigned long WindowHandle;

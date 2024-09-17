@@ -1,0 +1,13 @@
+diff --git a/src/SFML/Window/GlContext.cpp b/src/SFML/Window/GlContext.cpp
+index b93c6326..89490eb1 100644
+--- a/src/SFML/Window/GlContext.cpp
++++ b/src/SFML/Window/GlContext.cpp
+@@ -57,7 +57,7 @@
+
+     #endif
+
+-#elif defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_FREEBSD) || defined(SFML_SYSTEM_OPENBSD) || defined(SFML_SYSTEM_NETBSD)
++#elif defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_FREEBSD) || defined(SFML_SYSTEM_OPENBSD) || defined(SFML_SYSTEM_NETBSD) || defined(PROCURSUS)
+
+     #if defined(SFML_USE_DRM)
+

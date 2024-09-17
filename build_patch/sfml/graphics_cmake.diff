@@ -1,0 +1,15 @@
+diff --git a/src/SFML/Graphics/CMakeLists.txt b/src/SFML/Graphics/CMakeLists.txt
+index a939a988..8c6381af 100644
+--- a/src/SFML/Graphics/CMakeLists.txt
++++ b/src/SFML/Graphics/CMakeLists.txt
+@@ -2,6 +2,10 @@
+ set(INCROOT ${PROJECT_SOURCE_DIR}/include/SFML/Graphics)
+ set(SRCROOT ${PROJECT_SOURCE_DIR}/src/SFML/Graphics)
+
++if(PROCURSUS)
++    add_definitions(-DPROCURSUS)
++endif(PROCURSUS)
++
+ # all source files
+ set(SRC
+     ${SRCROOT}/BlendMode.cpp

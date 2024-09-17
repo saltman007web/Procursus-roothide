@@ -1,5 +1,5 @@
 diff --git a/src/SFML/Window/CMakeLists.txt b/src/SFML/Window/CMakeLists.txt
-index d2bdd5aa..df089a81 100644
+index d2bdd5aa..ad9f6275 100644
 --- a/src/SFML/Window/CMakeLists.txt
 +++ b/src/SFML/Window/CMakeLists.txt
 @@ -90,7 +90,7 @@ if(SFML_OS_WINDOWS)
@@ -11,7 +11,36 @@ index d2bdd5aa..df089a81 100644
      if(SFML_USE_DRM)
          add_definitions(-DSFML_USE_DRM)
          set(PLATFORM_SRC
-@@ -315,7 +315,7 @@ if ((NOT ${CMAKE_VERSION} VERSION_LESS 3.11) AND (NOT OpenGL_GL_PREFERENCE))
+@@ -111,6 +111,10 @@ elseif(SFML_OS_LINUX OR SFML_OS_FREEBSD OR SFML_OS_OPENBSD OR SFML_OS_NETBSD)
+             ${SRCROOT}/DRM/WindowImplDRM.hpp
+         )
+     else()
++        if(PROCURSUS)
++            add_definitions(-DPROCURSUS -DUSE_X11)
++        endif(PROCURSUS)
++
+         set(PLATFORM_SRC
+             ${SRCROOT}/Unix/CursorImpl.hpp
+             ${SRCROOT}/Unix/CursorImpl.cpp
+@@ -150,7 +154,7 @@ elseif(SFML_OS_LINUX OR SFML_OS_FREEBSD OR SFML_OS_OPENBSD OR SFML_OS_NETBSD)
+             )
+         endif()
+     endif()
+-    if(SFML_OS_LINUX)
++    if(SFML_OS_LINUX OR PROCURSUS)
+         set(PLATFORM_SRC
+             ${PLATFORM_SRC}
+             ${SRCROOT}/Unix/JoystickImpl.cpp
+@@ -283,6 +287,8 @@ endif()
+ # define the sfml-window target
+ sfml_add_library(sfml-window
+                  SOURCES ${SRC} ${PLATFORM_SRC})
++
++target_link_options(sfml-window PRIVATE "-v")
+ # DRM libraries
+ if(SFML_OS_LINUX OR SFML_OS_FREEBSD OR SFML_OS_OPENBSD OR SFML_OS_NETBSD)
+     if(SFML_USE_DRM)
+@@ -315,7 +321,7 @@ if ((NOT ${CMAKE_VERSION} VERSION_LESS 3.11) AND (NOT OpenGL_GL_PREFERENCE))
      set(OpenGL_GL_PREFERENCE "LEGACY")
  endif()
 
@@ -20,7 +49,7 @@ index d2bdd5aa..df089a81 100644
      sfml_add_external(GLES LINK "-framework OpenGLES")
 
      target_link_libraries(sfml-window PRIVATE GLES)
-@@ -337,17 +337,17 @@ if(SFML_OS_WINDOWS AND NOT SFML_COMPILER_MSVC)
+@@ -337,17 +343,18 @@ if(SFML_OS_WINDOWS AND NOT SFML_COMPILER_MSVC)
      endif()
  endif()
 
@@ -29,6 +58,7 @@ index d2bdd5aa..df089a81 100644
 -    target_link_libraries(sfml-window PRIVATE UDev dl)
 +if(SFML_OS_IOS OR PROCURSUS)
 +    target_link_libraries(sfml-window PRIVATE "-framework Foundation" "-framework UIKit" "-framework CoreGraphics" "-framework QuartzCore" "-framework CoreMotion")
++    target_link_libraries(sfml-window PRIVATE X11 Xcursor Xrandr)
  elseif(SFML_OS_WINDOWS)
      target_link_libraries(sfml-window PRIVATE winmm gdi32)
  elseif(SFML_OS_FREEBSD)

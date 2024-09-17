@@ -1,21 +1,16 @@
-# Please populate relevant fields and remove unneeded ones
-# (including this comment!) before building packages or
-# making a pull request.
-# 
-# Keep @DEB_SFML_V@, @DEB_ARCH@ and @DEB_MAINTAINER@ intact,
-# these are populated at build time.
-#
-# If you need to write a platform-specific control file,
-# append the platform to the filename as an extension
-# e.g. sfml.control.macosx
-#
-Package: sfml
+Package: sfml-dev
 Version: @DEB_SFML_V@
 Architecture: @DEB_ARCH@
 Maintainer: @DEB_MAINTAINER@
-Author: 
-Depends:
-Section: 
-Priority:
-Homepage:
-Description:
+Depends: libfreetype-dev, libx11-6, libxcursor1, libxrandr2
+Section: libdevel
+Priority: optional
+Homepage: https://www.sfml-dev.org/
+Description: Simple and Fast Multimedia Library
+              SFML is a modern multimedia library offering a wide range of subsystems
+              useful to produce a multimedia app. It offers OpenGL integration for
+              Hardware accelerated Graphics, Windowing and Input support, Audio and
+              Network facilities and supports GNU/Linux, MS Windows and Mac OS X.
+              .
+              This package includes header files for sfml-system sfml-window and
+              sfml-graphics.

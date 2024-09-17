@@ -1,0 +1,13 @@
+diff --git a/src/SFML/Window/CursorImpl.hpp b/src/SFML/Window/CursorImpl.hpp
+index 0c38373b..adf27011 100644
+--- a/src/SFML/Window/CursorImpl.hpp
++++ b/src/SFML/Window/CursorImpl.hpp
+@@ -32,7 +32,7 @@
+
+ #if defined(SFML_SYSTEM_WINDOWS)
+     #include <SFML/Window/Win32/CursorImpl.hpp>
+-#elif defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_FREEBSD) || defined(SFML_SYSTEM_OPENBSD) || defined(SFML_SYSTEM_NETBSD)
++#elif defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_FREEBSD) || defined(SFML_SYSTEM_OPENBSD) || defined(SFML_SYSTEM_NETBSD) || defined(PROCURSUS)
+     #if defined(SFML_USE_DRM)
+         #include <SFML/Window/DRM/CursorImpl.hpp>
+     #else

@@ -18,7 +18,7 @@ ifneq ($(wildcard $(BUILD_WORK)/sfml/.build_complete),)
 sfml:
 	@echo "Using previously built sfml."
 else
-sfml: sfml-setup libx11 freetype libogg libvorbis
+sfml: sfml-setup freetype libx11 libxcursor libxrandr
 	cd $(BUILD_WORK)/sfml/build && cmake \
 		$(DEFAULT_CMAKE_FLAGS) \
 		-DPROCURSUS=ON -DSFML_BUILD_AUDIO=OFF \

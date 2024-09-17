@@ -1,0 +1,13 @@
+diff --git a/src/SFML/Window/Unix/WindowImplX11.cpp b/src/SFML/Window/Unix/WindowImplX11.cpp
+index 554a9dbd..b9490fee 100644
+--- a/src/SFML/Window/Unix/WindowImplX11.cpp
++++ b/src/SFML/Window/Unix/WindowImplX11.cpp
+@@ -60,6 +60,8 @@
+     typedef sf::priv::GlxContext ContextType;
+ #endif
+
++#undef system // undef system defined in libiosexec.h, we don't need it here
++
+ ////////////////////////////////////////////////////////////
+ // Private data
+ ////////////////////////////////////////////////////////////

@@ -1,0 +1,13 @@
+diff --git a/src/SFML/Window/EglContext.hpp b/src/SFML/Window/EglContext.hpp
+index c02e89d4..7a12411f 100644
+--- a/src/SFML/Window/EglContext.hpp
++++ b/src/SFML/Window/EglContext.hpp
+@@ -166,7 +166,7 @@ public:
+     ////////////////////////////////////////////////////////////
+     static EGLConfig getBestConfig(EGLDisplay display, unsigned int bitsPerPixel, const ContextSettings& settings);
+
+-#if defined(SFML_SYSTEM_LINUX) && !defined(SFML_USE_DRM)
++#if (defined(SFML_SYSTEM_LINUX) || defined(PROCURSUS)) && !defined(SFML_USE_DRM)
+     ////////////////////////////////////////////////////////////
+     /// \brief Select the best EGL visual for a given set of settings
+     ///

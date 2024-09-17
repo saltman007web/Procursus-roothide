@@ -1,0 +1,13 @@
+diff --git a/src/SFML/Window/JoystickImpl.hpp b/src/SFML/Window/JoystickImpl.hpp
+index b915a6f9..4434350d 100644
+--- a/src/SFML/Window/JoystickImpl.hpp
++++ b/src/SFML/Window/JoystickImpl.hpp
+@@ -81,7 +81,7 @@ struct JoystickState
+
+     #include <SFML/Window/Win32/JoystickImpl.hpp>
+
+-#elif defined(SFML_SYSTEM_LINUX)
++#elif defined(SFML_SYSTEM_LINUX) || defined(PROCURSUS)
+
+     #include <SFML/Window/Unix/JoystickImpl.hpp>
+

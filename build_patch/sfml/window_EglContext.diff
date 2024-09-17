@@ -1,0 +1,13 @@
+diff --git a/src/SFML/Window/EglContext.cpp b/src/SFML/Window/EglContext.cpp
+index a43a211a..87065f16 100644
+--- a/src/SFML/Window/EglContext.cpp
++++ b/src/SFML/Window/EglContext.cpp
+@@ -361,7 +361,7 @@ void EglContext::updateSettings()
+ }
+
+
+-#if defined(SFML_SYSTEM_LINUX) && !defined(SFML_USE_DRM)
++#if (defined(SFML_SYSTEM_LINUX) || defined(PROCURSUS)) && !defined(SFML_USE_DRM)
+ ////////////////////////////////////////////////////////////
+ XVisualInfo EglContext::selectBestVisual(::Display* XDisplay, unsigned int bitsPerPixel, const ContextSettings& settings)
+ {
