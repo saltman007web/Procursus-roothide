@@ -2,7 +2,7 @@ Package: sfml-dev
 Version: @DEB_SFML_V@
 Architecture: @DEB_ARCH@
 Maintainer: @DEB_MAINTAINER@
-Depends: libfreetype-dev, libx11-6, libxcursor1, libxrandr2
+Depends: libfreetype6, libx11-6, libxcursor1, libxrandr2
 Section: libdevel
 Priority: optional
 Homepage: https://www.sfml-dev.org/
