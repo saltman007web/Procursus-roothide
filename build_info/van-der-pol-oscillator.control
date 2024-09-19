@@ -1,0 +1,10 @@
+Package: van-der-pol-oscillator
+Version: @DEB_VAN_DER_POL_OSCILLATOR_V@
+Architecture: @DEB_ARCH@
+Maintainer: @DEB_MAINTAINER@
+Author: Pe13
+Depends: libsfml-dev
+Section: Utilities
+Priority: optional
+Homepage: https://github.com/A-lida/Van-der-Pol-Oscillator
+Description: A simple PoC for X11 sfml testing purpose
