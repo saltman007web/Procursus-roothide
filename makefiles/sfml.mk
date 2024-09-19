@@ -28,7 +28,7 @@ sfml: sfml-setup freetype libx11 libxcursor libxrandr
 	+$(MAKE) -C $(BUILD_WORK)/sfml/build
 	+$(MAKE) -C $(BUILD_WORK)/sfml/build install \
 		DESTDIR="$(BUILD_STAGE)/sfml"
-	$(call AFTER_BUILD)
+	$(call AFTER_BUILD,copy)
 endif
 
 sfml-package: sfml-stage
