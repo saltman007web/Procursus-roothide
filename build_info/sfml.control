@@ -1,4 +1,4 @@
-Package: sfml-dev
+Package: libsfml-dev
 Version: @DEB_SFML_V@
 Architecture: @DEB_ARCH@
 Maintainer: @DEB_MAINTAINER@
