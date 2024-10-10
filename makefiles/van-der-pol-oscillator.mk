@@ -7,8 +7,7 @@ VAN_DER_POL_OSCILLATOR_VERSION := 0.1
 DEB_VAN_DER_POL_OSCILLATOR_V   ?= $(VAN_DER_POL_OSCILLATOR_VERSION)
 
 van-der-pol-oscillator-setup: setup
-	$(call GIT_CLONE,https://github.com/A-lida/Van-der-Pol-Oscillator.git,main,van-der-pol-oscillator)
-
+	$(call GIT_CLONE,https://github.com/A-lida/Van-der-Pol-Oscillator.git,ios_X11,van-der-pol-oscillator)
 	mkdir -p $(BUILD_WORK)/van-der-pol-oscillator/build
 
 ifneq ($(wildcard $(BUILD_WORK)/van-der-pol-oscillator/.build_complete),)
@@ -18,7 +17,7 @@ else
 van-der-pol-oscillator: van-der-pol-oscillator-setup sfml
 	cd $(BUILD_WORK)/van-der-pol-oscillator/build && cmake . \
 		$(DEFAULT_CMAKE_FLAGS) -DSFML_DIR=$(BUILD_BASE)/usr/lib/cmake/SFML \
-		..
+		-DCMAKE_BUILD_TYPE=Debug ..
 	+$(MAKE) -C $(BUILD_WORK)/van-der-pol-oscillator/build
 	+$(MAKE) -C $(BUILD_WORK)/van-der-pol-oscillator/build install \
 		DESTDIR="$(BUILD_STAGE)/van-der-pol-oscillator"

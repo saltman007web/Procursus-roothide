@@ -24,7 +24,7 @@ sfml: sfml-setup freetype libx11 libxcursor libxrandr
 		-DPROCURSUS=ON -DSFML_BUILD_AUDIO=OFF \
 		-DSFML_BUILD_NETWORK=OFF \
 		-DSFML_USE_SYSTEM_DEPS=ON \
-		-B . -S ..
+		-B . -S .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
 	+$(MAKE) -C $(BUILD_WORK)/sfml/build
 	+$(MAKE) -C $(BUILD_WORK)/sfml/build install \
 		DESTDIR="$(BUILD_STAGE)/sfml"
