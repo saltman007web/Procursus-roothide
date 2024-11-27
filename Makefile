@@ -24,8 +24,8 @@ ifneq ($(shell umask),0022)
 $(error Please run `umask 022` before running this)
 endif
 
-MEMO_TARGET          ?= darwin-arm64
-MEMO_CFVER           ?= 1800
+MEMO_TARGET          ?= iphoneos-arm64-roothide
+MEMO_CFVER           ?= 1900
 # iOS 13.0 == 1665.15.
 CFVER_WHOLE          != echo $(MEMO_CFVER) | cut -d. -f1
 
@@ -424,6 +424,32 @@ ifneq ($(MEMO_QUIET),1)
 $(warning Building for $(BARE_PLATFORM) $(MEMO_ARCH) with CoreFoundation version $(MEMO_CFVER) and prefix $(MEMO_PREFIX))
 endif
 
+
+REPO_BASE      != dirname $(realpath $(firstword $(MAKEFILE_LIST)))
+# Root
+BUILD_ROOT     ?= $(PWD)
+# Downloaded source files
+BUILD_SOURCE   := $(BUILD_ROOT)/build_source
+# Base headers/libs (e.g. patched from SDK)
+BUILD_BASE     := $(BUILD_ROOT)/build_base/$(MEMO_TARGET)/$(MEMO_CFVER)
+# Dpkg info storage area
+BUILD_INFO     ?= $(REPO_BASE)/build_info
+# Miscellaneous Procursus files
+BUILD_MISC     ?= $(REPO_BASE)/build_misc
+# Patch storage area
+BUILD_PATCH    ?= $(REPO_BASE)/build_patch
+# Extracted source working directory
+BUILD_WORK     := $(BUILD_ROOT)/build_work/$(MEMO_TARGET)/$(MEMO_CFVER)
+# Bootstrap working area
+BUILD_STAGE    := $(BUILD_ROOT)/build_stage/$(MEMO_TARGET)/$(MEMO_CFVER)
+# Final output
+BUILD_DIST     := $(BUILD_ROOT)/build_dist/$(MEMO_TARGET)/$(MEMO_CFVER)/work/
+# Actual bootrap staging
+BUILD_STRAP    := $(BUILD_ROOT)/build_strap/$(MEMO_TARGET)/$(MEMO_CFVER)
+# Extra scripts for the buildsystem
+BUILD_TOOLS    ?= $(REPO_BASE)/build_tools
+
+
 ifeq ($(UNAME),Linux)
 ifneq ($(MEMO_QUIET),1)
 $(warning Building on GNU Linux)
@@ -505,11 +531,13 @@ else # ($(shell sw_vers -productName),macOS)
 ifneq ($(MEMO_QUIET),1)
 $(warning Building on iOS)
 endif # ($(MEMO_QUIET),1)
+ON_IOS := 1
 TARGET_SYSROOT  ?= /usr/share/SDKs/$(BARE_PLATFORM).sdk
 MACOSX_SYSROOT  ?= /usr/share/SDKs/MacOSX.sdk
-CC              != command -v cc
-CXX             != command -v c++
-CPP             := $(CC) -E
+CC              := $(BUILD_TOOLS)/cc-wrapper.sh
+CXX             := $(BUILD_TOOLS)/cxx-wrapper.sh
+CPP             != command -v cc
+CPP             := $(CPP) -E
 PATH            := /usr/bin:$(PATH)
 
 CFLAGS_FOR_BUILD   := -arch $(shell arch) -miphoneos-version-min=$(shell sw_vers -productVersion)
@@ -530,16 +558,30 @@ OTOOL           != command -v otool
 I_N_T           != command -v install_name_tool
 LIBTOOL         != command -v libtool
 
+ifeq ($(ON_IOS),1)
+INSTALL := $(BUILD_TOOLS)/install-wrapper.sh
+I_N_T := $(BUILD_TOOLS)/i_n_t-wrapper.sh
+endif
+
 else #ifeq ($(UNAME),Darwin)
 $(error Please use macOS, iOS, Linux, or FreeBSD to build)
 endif
 
+ifeq ($(ON_IOS),1)
+CC_FOR_BUILD  := $(CC) $(CFLAGS_FOR_BUILD)
+CPP_FOR_BUILD := $(CPP) $(CPPFLAGS_FOR_BUILD)
+CXX_FOR_BUILD := $(CXX) $(CXXFLAGS_FOR_BUILD)
+AR_FOR_BUILD  := $(shell command -v ar)
+RANLIB_FOR_BUILD := $(shell command -v ranlib)
+STRIP_FOR_BUILD := $(shell command -v strip)
+else
 CC_FOR_BUILD  := $(shell command -v cc) $(CFLAGS_FOR_BUILD)
 CPP_FOR_BUILD := $(shell command -v cc) -E $(CPPFLAGS_FOR_BUILD)
 CXX_FOR_BUILD := $(shell command -v c++) $(CXXFLAGS_FOR_BUILD)
 AR_FOR_BUILD  := $(shell command -v ar)
 RANLIB_FOR_BUILD := $(shell command -v ranlib)
 STRIP_FOR_BUILD := $(shell command -v strip)
+endif
 export CC_FOR_BUILD CPP_FOR_BUILD CXX_FOR_BUILD AR_FOR_BUILD
 
 DEB_MAINTAINER    ?= roothide <roothideDev@twitter>
@@ -551,30 +593,6 @@ MEMO_LDID_EXTRA_FLAGS     ?=
 MEMO_CODESIGN_EXTRA_FLAGS ?=
 
 LDID := ldid -Hsha256 -Cadhoc $(MEMO_LDID_EXTRA_FLAGS)
-
-REPO_BASE      != dirname $(realpath $(firstword $(MAKEFILE_LIST)))
-# Root
-BUILD_ROOT     ?= $(PWD)
-# Downloaded source files
-BUILD_SOURCE   := $(BUILD_ROOT)/build_source
-# Base headers/libs (e.g. patched from SDK)
-BUILD_BASE     := $(BUILD_ROOT)/build_base/$(MEMO_TARGET)/$(MEMO_CFVER)
-# Dpkg info storage area
-BUILD_INFO     ?= $(REPO_BASE)/build_info
-# Miscellaneous Procursus files
-BUILD_MISC     ?= $(REPO_BASE)/build_misc
-# Patch storage area
-BUILD_PATCH    ?= $(REPO_BASE)/build_patch
-# Extracted source working directory
-BUILD_WORK     := $(BUILD_ROOT)/build_work/$(MEMO_TARGET)/$(MEMO_CFVER)
-# Bootstrap working area
-BUILD_STAGE    := $(BUILD_ROOT)/build_stage/$(MEMO_TARGET)/$(MEMO_CFVER)
-# Final output
-BUILD_DIST     := $(BUILD_ROOT)/build_dist/$(MEMO_TARGET)/$(MEMO_CFVER)/work/
-# Actual bootrap staging
-BUILD_STRAP    := $(BUILD_ROOT)/build_strap/$(MEMO_TARGET)/$(MEMO_CFVER)
-# Extra scripts for the buildsystem
-BUILD_TOOLS    ?= $(REPO_BASE)/build_tools
 
 ifeq ($(DEBUG),1)
 OPTIMIZATION_FLAGS := -g -O0
@@ -655,6 +673,38 @@ MEMO_MANPAGE_SUFFIX    :=
 MEMO_MANPAGE_COMPCMD   := true
 endif
 
+ifeq ($(ON_IOS),1)
+
+DEFAULT_CMAKE_FLAGS := \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_CROSSCOMPILING=OFF \
+	-DCMAKE_SYSTEM_NAME=Darwin \
+	-DCMAKE_SYSTEM_PROCESSOR="aarch64-apple-darwin" \
+	-DCMAKE_C_FLAGS="$(CFLAGS)" \
+	-DCMAKE_CXX_FLAGS="$(CXXFLAGS)" \
+	-DCMAKE_FIND_ROOT_PATH="$(BUILD_BASE)" \
+	-DPKG_CONFIG_EXECUTABLE="$(BUILD_TOOLS)/cross-pkg-config" \
+	-DCMAKE_INSTALL_NAME_TOOL="$(I_N_T)" \
+	-DCMAKE_INSTALL_PREFIX="$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)" \
+	-DCMAKE_INSTALL_NAME_DIR="$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib" \
+	-DCMAKE_INSTALL_RPATH="$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)" \
+	-DCMAKE_INSTALL_SYSCONFDIR="$(MEMO_PREFIX)/etc" \
+	-DCMAKE_OSX_SYSROOT="$(TARGET_SYSROOT)" \
+	-DCMAKE_OSX_ARCHITECTURES="$(MEMO_ARCH)"
+
+DEFAULT_CONFIGURE_FLAGS := \
+	--host="aarch64-apple-darwin"
+	--prefix=$(MEMO_PREFIX)$(MEMO_SUB_PREFIX) \
+	--localstatedir=$(MEMO_PREFIX)/var \
+	--sysconfdir=$(MEMO_PREFIX)/etc \
+	--bindir=$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/bin \
+	--mandir=$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/share/man \
+	--enable-silent-rules \
+	--disable-dependency-tracking \
+	--enable-shared \
+	--enable-static
+
+else
 DEFAULT_CMAKE_FLAGS := \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_CROSSCOMPILING=true \
@@ -700,6 +750,8 @@ DEFAULT_CONFIGURE_FLAGS := \
 	--disable-dependency-tracking \
 	--enable-shared \
 	--enable-static
+
+endif # ifeq($(ON_IOS),1)
 
 DEFAULT_PERL_MAKE_FLAGS := \
 	INSTALLSITEARCH=$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib/perl5/$${PERL_MAJOR} \
@@ -1144,7 +1196,11 @@ $(error Install GNU findutils)
 endif
 
 ifeq ($(shell PATH="$(PATH)" install --version | grep -q 'GNU coreutils' && echo 1),1)
+ifeq ($(ON_IOS),1)
+export INSTALL := $(BUILD_TOOLS)/install-wrapper.sh --strip-program=$(STRIP)
+else
 export INSTALL := $(shell PATH="$(PATH)" which install) --strip-program=$(STRIP)
+endif
 export LN_S    := ln -sf
 export LN_SR   := ln -sfr
 else
@@ -1677,6 +1733,20 @@ endif
 	@cp -af $(BUILD_MISC)/roothide/roothide.h $(BUILD_BASE)/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/include/
 	@cp -af $(BUILD_MISC)/roothide/*.tbd $(BUILD_BASE)/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib/
 
+endif
+
+ifeq ($(ON_IOS),1)
+	sed "s|@BUILD_MISC@|$(BUILD_MISC)|" < $(BUILD_TOOLS)/cc-wrapper.sh.in > $(BUILD_TOOLS)/cc-wrapper.sh
+	chmod +x $(BUILD_TOOLS)/cc-wrapper.sh
+
+	sed "s|@BUILD_MISC@|$(BUILD_MISC)|" < $(BUILD_TOOLS)/cxx-wrapper.sh.in > $(BUILD_TOOLS)/cxx-wrapper.sh
+	chmod +x $(BUILD_TOOLS)/cxx-wrapper.sh
+
+	sed "s|@BUILD_MISC@|$(BUILD_MISC)|" < $(BUILD_TOOLS)/install-wrapper.sh.in > $(BUILD_TOOLS)/install-wrapper.sh
+	chmod +x $(BUILD_TOOLS)/install-wrapper.sh
+
+	sed "s|@BUILD_MISC@|$(BUILD_MISC)|" < $(BUILD_TOOLS)/i_n_t-wrapper.sh.in > $(BUILD_TOOLS)/i_n_t-wrapper.sh
+	chmod +x $(BUILD_TOOLS)/i_n_t-wrapper.sh
 endif
 
 ifneq ($(MEMO_QUIET),1)

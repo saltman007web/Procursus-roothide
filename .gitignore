@@ -8,6 +8,7 @@ build_pack/
 source-temp/
 pack-cache/
 source-old/
+logs/
 
 !.gitkeep
 .DS_Store
