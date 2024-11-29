@@ -558,11 +558,6 @@ OTOOL           != command -v otool
 I_N_T           != command -v install_name_tool
 LIBTOOL         != command -v libtool
 
-ifeq ($(ON_IOS),1)
-INSTALL := $(BUILD_TOOLS)/install-wrapper.sh
-I_N_T := $(BUILD_TOOLS)/i_n_t-wrapper.sh
-endif
-
 else #ifeq ($(UNAME),Darwin)
 $(error Please use macOS, iOS, Linux, or FreeBSD to build)
 endif
@@ -693,7 +688,7 @@ DEFAULT_CMAKE_FLAGS := \
 	-DCMAKE_OSX_ARCHITECTURES="$(MEMO_ARCH)"
 
 DEFAULT_CONFIGURE_FLAGS := \
-	--host="aarch64-apple-darwin"
+	--host="aarch64-apple-darwin" \
 	--prefix=$(MEMO_PREFIX)$(MEMO_SUB_PREFIX) \
 	--localstatedir=$(MEMO_PREFIX)/var \
 	--sysconfdir=$(MEMO_PREFIX)/etc \
@@ -905,6 +900,18 @@ DO_PATCH    = cd $(BUILD_PATCH)/$(1); \
 	done
 
 ifeq (,$(findstring darwin,$(MEMO_TARGET)))
+ifeq ($(ON_IOS),1)
+SIGN = 	for file in $$(find $(BUILD_DIST)/$(1) -type f -exec sh -c "file -ib '{}' | grep -q 'x-mach-binary; charset=binary'" \; -print); do \
+			if [ $${file\#\#*.} != "a" ]; then \
+				$(LDID) -s $$file; \
+				if [ $${file\#\#*.} = "dylib" ] || [ $${file\#\#*.} = "bundle" ] || [ $${file\#\#*.} = "so" ]; then \
+					$(LDID) -S $$file; \
+				else \
+					$(LDID) -S$(BUILD_MISC)/entitlements/$(2) $$file; \
+				fi; \
+			fi; \
+		done
+else
 SIGN = 	for file in $$(find $(BUILD_DIST)/$(1) -type f -exec sh -c "file -ib '{}' | grep -q 'x-mach-binary; charset=binary'" \; -print); do \
 			if [ $${file\#\#*.} != "a" ]; then \
 				if [ $${file\#\#*.} = "dylib" ] || [ $${file\#\#*.} = "bundle" ] || [ $${file\#\#*.} = "so" ]; then \
@@ -914,6 +921,7 @@ SIGN = 	for file in $$(find $(BUILD_DIST)/$(1) -type f -exec sh -c "file -ib '{}
 				fi; \
 			fi; \
 		done
+endif
 else
 SIGN = 	CODESIGN_FLAGS="--sign $(CODESIGN_IDENTITY) --force --deep "; \
 		if [ "$(CODESIGN_IDENTITY)" != "-" ]; then \
@@ -1196,11 +1204,7 @@ $(error Install GNU findutils)
 endif
 
 ifeq ($(shell PATH="$(PATH)" install --version | grep -q 'GNU coreutils' && echo 1),1)
-ifeq ($(ON_IOS),1)
-export INSTALL := $(BUILD_TOOLS)/install-wrapper.sh --strip-program=$(STRIP)
-else
 export INSTALL := $(shell PATH="$(PATH)" which install) --strip-program=$(STRIP)
-endif
 export LN_S    := ln -sf
 export LN_SR   := ln -sfr
 else
@@ -1741,12 +1745,6 @@ ifeq ($(ON_IOS),1)
 
 	sed "s|@BUILD_MISC@|$(BUILD_MISC)|" < $(BUILD_TOOLS)/cxx-wrapper.sh.in > $(BUILD_TOOLS)/cxx-wrapper.sh
 	chmod +x $(BUILD_TOOLS)/cxx-wrapper.sh
-
-	sed "s|@BUILD_MISC@|$(BUILD_MISC)|" < $(BUILD_TOOLS)/install-wrapper.sh.in > $(BUILD_TOOLS)/install-wrapper.sh
-	chmod +x $(BUILD_TOOLS)/install-wrapper.sh
-
-	sed "s|@BUILD_MISC@|$(BUILD_MISC)|" < $(BUILD_TOOLS)/i_n_t-wrapper.sh.in > $(BUILD_TOOLS)/i_n_t-wrapper.sh
-	chmod +x $(BUILD_TOOLS)/i_n_t-wrapper.sh
 endif
 
 ifneq ($(MEMO_QUIET),1)
