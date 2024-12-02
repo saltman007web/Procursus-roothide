@@ -3,6 +3,8 @@
 # Required variables
 BUILD_STAGE=${BUILD_STAGE:-build/stage}  # Default if not defined
 DEFAULT_ENTITLEMENTS="@BUILD_MISC@/entitlements/general.xml"  # Default entitlements file
+MEMO_LINK_PREFIX=@MEMO_LINK_PREFIX@
+MEMO_SUB_PREFIX=@MEMO_SUB_PREFIX@
 
 # Parse options to identify an executable
 IS_EXECUTABLE=true
@@ -34,6 +36,9 @@ fi
 
 # Check if the output is an executable and sign it
 if [ "$IS_EXECUTABLE" = true ] && [ -x "$OUTPUT_FILE" ]; then
+    # Add rpath to the executable to allow its to loads libs too
+    install_name_tool -add_rpath "${MEMO_LINK_PREFIX}${MEMO_SUB_PREFIX}/lib" "$OUTPUT_FILE"
+
     # Determine entitlements file to use
     ENTITLEMENTS_FILE="${SIGN_ENTITLEMENTS:-$DEFAULT_ENTITLEMENTS}"
 

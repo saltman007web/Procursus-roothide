@@ -688,7 +688,7 @@ DEFAULT_CMAKE_FLAGS := \
 	-DCMAKE_OSX_ARCHITECTURES="$(MEMO_ARCH)"
 
 DEFAULT_CONFIGURE_FLAGS := \
-	--host="aarch64-apple-darwin" \
+	--build="aarch64-apple-darwin" \
 	--prefix=$(MEMO_PREFIX)$(MEMO_SUB_PREFIX) \
 	--localstatedir=$(MEMO_PREFIX)/var \
 	--sysconfdir=$(MEMO_PREFIX)/etc \
@@ -945,6 +945,63 @@ endif
 #
 ###
 
+ifeq ($(ON_IOS),1)
+AFTER_BUILD = \
+	if [ ! -z "$(2)" ]; then \
+		pkg="$(2)"; \
+	else \
+		pkg="$@"; \
+	fi; \
+	if [ ! -z "$(MEMO_ROOTLESS)" ] && [ -d "$(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)" ]; then \
+		rm -f $(BUILD_STAGE)/$$pkg/._lib_cache && touch $(BUILD_STAGE)/$$pkg/._lib_cache; \
+		for file in $$(find $(BUILD_STAGE)/$$pkg -type f -exec sh -c "file -ib '{}' | grep -q 'x-mach-binary; charset=binary'" \; -print); do \
+			if [ $${file\#\#*.} != "a" ] && [ $${file\#\#*.} != "dSYM" ]; then \
+				INSTALL_NAME=$$($(OTOOL) -D $$file | grep -v -e ":$$" -e "^Archive :" | head -n1); \
+				if [ ! -z "$$INSTALL_NAME" ] && ( ( echo "$$INSTALL_NAME" | grep -q ^$(MEMO_PREFIX)/ ) || ! ( echo "$$INSTALL_NAME" | grep -q / ) ); then \
+					chmod +w $$file; echo "some packages may be installed into the BUILD_STAGE with 0555 permission, for example: berkeleydb" > /dev/null; \
+					$(I_N_T) -id @rpath/$$(basename $$INSTALL_NAME) $$file; \
+					echo "$$INSTALL_NAME" >> $(BUILD_STAGE)/$$pkg/._lib_cache; \
+				fi; \
+			fi; \
+		done; \
+	fi; \
+	for file in $$(find $(BUILD_STAGE)/$$pkg -type f -exec sh -c "file -ib '{}' | grep -q 'x-mach-binary; charset=binary'" \; -print); do \
+		if [ $${file\#\#*.} != "a" ] && [ $${file\#\#*.} != "dSYM" ]; then \
+			chmod +w $$file; echo "some packages may be installed into the BUILD_STAGE with 0555 permission, for example: berkeleydb" > /dev/null; \
+			$(I_N_T) -delete_rpath "$(shell jbroot)$(MEMO_SUB_PREFIX)/lib" $$file; \
+			$(I_N_T) -add_rpath "$(MEMO_LINK_PREFIX)$(MEMO_SUB_PREFIX)$(MEMO_ALT_PREFIX)/lib" $$file; \
+			$(I_N_T) -add_rpath "$(MEMO_LINK_PREFIX)$(MEMO_SUB_PREFIX)/lib" $$file; \
+			if [ ! -z "$(3)" ]; then \
+				$(I_N_T) -add_rpath "$(3)" $$file; \
+			fi; \
+			if [ -f $(BUILD_STAGE)/$$pkg/._lib_cache ]; then \
+				cat $(BUILD_STAGE)/$$pkg/._lib_cache | while read line; do \
+					$(I_N_T) -change $$line @rpath/$$(basename $$line) $$file; \
+				done; \
+			fi; \
+			if [ "$(DEBUG)" != "1" ]; then $(STRIP) -x $$file; fi; \
+			if [ ! -z "$(findstring roothide,$(MEMO_TARGET))" ];then \
+				if [ -z "$(4)" ]; then symredirect $$file || exit 1; fi; \
+			fi; \
+		fi; \
+	done; \
+	rm -f $(BUILD_STAGE)/$$pkg/._lib_cache; \
+	find $(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/share/man -type f -name '*.gz$$' -exec gunzip '{}' \; 2> /dev/null; \
+	find $(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/share/man -type f -name '*.xz$$' -exec unxz '{}' \; 2> /dev/null; \
+	find $(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/share/man -type f -name '*.zst$$' -exec unzstd '{}' \; 2> /dev/null; \
+	if [ "$(MEMO_NO_DOC_COMPRESS)" != 1 ]; then \
+		find $(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/share/man -type f -exec $(MEMO_MANPAGE_COMPCMD) $(MEMO_MANPAGE_COMPFLGS) '{}' \; 2> /dev/null; \
+		find $(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/share/man -type l -exec bash -c '$(LN_S) $$(readlink "{}" | sed -e "s/\.gz$$//" -e "s/\.xz$$//" -e "s/\.zst$$//")$(MEMO_MANPAGE_SUFFIX) "{}"$(MEMO_MANPAGE_SUFFIX); rm -f "{}"' \; -delete 2> /dev/null; \
+	else \
+		find $(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/share/man -type l -exec bash -c '$(LN_S) $$(readlink "{}" | sed -e "s/\.gz$$//" -e "s/\.xz$$//" -e "s/\.zst$$//") "{}"' \; 2> /dev/null; \
+	fi; \
+	if [ "$(1)" = "copy" ]; then \
+		cp -af $(BUILD_STAGE)/$$pkg/* $(BUILD_BASE); \
+	fi; \
+	[ -d $(BUILD_WORK)/$$pkg/ ] || mkdir $(BUILD_WORK)/$$pkg/; \
+	touch $(BUILD_WORK)/$$pkg/.build_complete; \
+	find $(BUILD_BASE) -name '*.la' \( -type f -o -type l \) -delete
+else
 AFTER_BUILD = \
 	if [ ! -z "$(2)" ]; then \
 		pkg="$(2)"; \
@@ -999,7 +1056,7 @@ AFTER_BUILD = \
 	[ -d $(BUILD_WORK)/$$pkg/ ] || mkdir $(BUILD_WORK)/$$pkg/; \
 	touch $(BUILD_WORK)/$$pkg/.build_complete; \
 	find $(BUILD_BASE) -name '*.la' \( -type f -o -type l \) -delete
-
+endif
 PACK = \
 	if [ ! -z "$(findstring roothide,$(MEMO_TARGET))" ];then \
 		for file in $$(find $(BUILD_DIST)/$(1) -type f -exec sh -c "file -b '{}' | grep 'Mach-O' | grep -q 'executable'" \; -print); do \
@@ -1741,9 +1798,13 @@ endif
 
 ifeq ($(ON_IOS),1)
 	sed "s|@BUILD_MISC@|$(BUILD_MISC)|" < $(BUILD_TOOLS)/cc-wrapper.sh.in > $(BUILD_TOOLS)/cc-wrapper.sh
+	sed -i "s|@MEMO_LINK_PREFIX@|$(shell jbroot)|" $(BUILD_TOOLS)/cc-wrapper.sh
+	sed -i "s|@MEMO_SUB_PREFIX@|$(MEMO_SUB_PREFIX)|" $(BUILD_TOOLS)/cc-wrapper.sh
 	chmod +x $(BUILD_TOOLS)/cc-wrapper.sh
 
 	sed "s|@BUILD_MISC@|$(BUILD_MISC)|" < $(BUILD_TOOLS)/cxx-wrapper.sh.in > $(BUILD_TOOLS)/cxx-wrapper.sh
+	sed -i "s|@MEMO_LINK_PREFIX@|$(shell jbroot)|" $(BUILD_TOOLS)/cxx-wrapper.sh
+	sed -i "s|@MEMO_SUB_PREFIX@|$(MEMO_SUB_PREFIX)|" $(BUILD_TOOLS)/cxx-wrapper.sh
 	chmod +x $(BUILD_TOOLS)/cxx-wrapper.sh
 endif
 
