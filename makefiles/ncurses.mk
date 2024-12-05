@@ -19,6 +19,7 @@ ncurses:
 	@echo "Using previously built ncurses."
 else
 ncurses: ncurses-setup
+	sed -i "s|@ACTUAL_PACKAGE@|$@|" $(BUILD_TOOLS)/cc-wrapper.sh
 	cd $(BUILD_WORK)/ncurses && ./configure -C \
 		$(DEFAULT_CONFIGURE_FLAGS) \
 		--with-build-cc="$(CC_FOR_BUILD)" \

@@ -1797,14 +1797,16 @@ endif
 endif
 
 ifeq ($(ON_IOS),1)
-	sed "s|@BUILD_MISC@|$(BUILD_MISC)|" < $(BUILD_TOOLS)/cc-wrapper.sh.in > $(BUILD_TOOLS)/cc-wrapper.sh
-	sed -i "s|@MEMO_LINK_PREFIX@|$(shell jbroot)|" $(BUILD_TOOLS)/cc-wrapper.sh
-	sed -i "s|@MEMO_SUB_PREFIX@|$(MEMO_SUB_PREFIX)|" $(BUILD_TOOLS)/cc-wrapper.sh
+	sed "s|@BUILD_STAGE@|$(shell jbroot $(BUILD_STAGE))|" < $(BUILD_TOOLS)/cc-wrapper.sh.in > $(BUILD_TOOLS)/cc-wrapper.sh
+	sed -i "s|@BUILD_MISC@|$(BUILD_MISC)|" $(BUILD_TOOLS)/cc-wrapper.sh
+	sed -i "s|@DEFAULT_SYSTEM_LIBS@|$(shell jbroot /usr/lib)|" $(BUILD_TOOLS)/cc-wrapper.sh # TODO make theese paths build-platform dependent
+	sed -i "s|@ALT_SYSTEM_LIBS@|$(shell jbroot /usr/local/lib)|" $(BUILD_TOOLS)/cc-wrapper.sh
 	chmod +x $(BUILD_TOOLS)/cc-wrapper.sh
 
-	sed "s|@BUILD_MISC@|$(BUILD_MISC)|" < $(BUILD_TOOLS)/cxx-wrapper.sh.in > $(BUILD_TOOLS)/cxx-wrapper.sh
-	sed -i "s|@MEMO_LINK_PREFIX@|$(shell jbroot)|" $(BUILD_TOOLS)/cxx-wrapper.sh
-	sed -i "s|@MEMO_SUB_PREFIX@|$(MEMO_SUB_PREFIX)|" $(BUILD_TOOLS)/cxx-wrapper.sh
+	sed "s|@BUILD_STAGE@|$(shell jbroot $(BUILD_STAGE))|" < $(BUILD_TOOLS)/cxx-wrapper.sh.in > $(BUILD_TOOLS)/cxx-wrapper.sh
+	sed -i "s|@BUILD_MISC@|$(BUILD_MISC)|" $(BUILD_TOOLS)/cxx-wrapper.sh
+	sed -i "s|@DEFAULT_SYSTEM_LIBS@|$(shell jbroot /usr/lib)|" $(BUILD_TOOLS)/cxx-wrapper.sh # TODO make theese paths build-platform dependent
+	sed -i "s|@ALT_SYSTEM_LIBS@|$(shell jbroot /usr/local/lib)|" $(BUILD_TOOLS)/cxx-wrapper.sh
 	chmod +x $(BUILD_TOOLS)/cxx-wrapper.sh
 endif
 

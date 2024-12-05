@@ -1,50 +1,73 @@
 #!/bin/bash
 
 # Required variables
-BUILD_STAGE=${BUILD_STAGE:-build/stage}  # Default if not defined
+BUILD_STAGE=@BUILD_STAGE@
 DEFAULT_ENTITLEMENTS="@BUILD_MISC@/entitlements/general.xml"  # Default entitlements file
-MEMO_LINK_PREFIX=@MEMO_LINK_PREFIX@
-MEMO_SUB_PREFIX=@MEMO_SUB_PREFIX@
+DEFAULT_SYSTEM_LIBS=@DEFAULT_SYSTEM_LIBS@ # path to ${MEMO_PREFIX}${MEMO_SUB_PREFIX}/lib
+ALT_SYSTEM_LIBS=@ALT_SYSTEM_LIBS@ # path to ${MEMO_PREFIX}${MEMO_SUB_PREFIX}/local/lib
+ACTUAL_PACKAGE=@ACTUAL_PACKAGE@
 
 # Parse options to identify an executable
 IS_EXECUTABLE=true
 OUTPUT_FILE="a.out"  # Default value if -o is not specified
+INSTALL_NAME_FLAG=false
 
+# Parse arguments to handle special cases
+MODIFIED_ARGS=()
 for arg in "$@"; do
     case $arg in
-        -c) IS_EXECUTABLE=false ;;    # -c flag means it is not an executable
-        -o) OUTPUT_FILE_NEXT=true ;;  # Identify the output file
+        -c)
+            IS_EXECUTABLE=false  # -c flag means it is not an executable
+            MODIFIED_ARGS+=("$arg")
+            ;;
+        -o)
+            OUTPUT_FILE_NEXT=true  # Next argument is the output file
+            MODIFIED_ARGS+=("$arg")
+            ;;
+        -install_name)
+            INSTALL_NAME_FLAG=true  # Signal that the next argument is the install_name value
+            MODIFIED_ARGS+=("$arg")
+            ;;
         *)
             if [ "$OUTPUT_FILE_NEXT" = true ]; then
                 OUTPUT_FILE="$arg"
                 OUTPUT_FILE_NEXT=false
+                MODIFIED_ARGS+=("$arg")
+            elif [ "$INSTALL_NAME_FLAG" = true ]; then
+                # Replace the install_name value with the desired format
+                INSTALL_NAME_FLAG=false
+                MODIFIED_INSTALL_NAME="@rpath/${arg}"
+                MODIFIED_ARGS+=("$MODIFIED_INSTALL_NAME")
+            else
+                MODIFIED_ARGS+=("$arg")
             fi
             ;;
     esac
 done
 
-# Determine the real compiler (gcc or g++)
-REAL_COMPILER=$(basename "$0")
-if [ "$REAL_COMPILER" = "cxx-wrapper.sh" ]; then
-    REAL_COMPILER="clang++"  # Default to g++ if used as CXX wrapper
-fi
-
 # Use the actual compiler to compile the code
-if ! "$REAL_COMPILER" "$@"; then
+if ! "clang++" "${MODIFIED_ARGS[@]}"; then
     exit 1 # Exit with an error if compilation fails
 fi
 
 # Check if the output is an executable and sign it
 if [ "$IS_EXECUTABLE" = true ] && [ -x "$OUTPUT_FILE" ]; then
-    # Add rpath to the executable to allow its to loads libs too
-    install_name_tool -add_rpath "${MEMO_LINK_PREFIX}${MEMO_SUB_PREFIX}/lib" "$OUTPUT_FILE"
+    # Add rpath to binary to allow it to load package's lib from stage dir
+    install_name_tool -add_rpath "$(jbroot ${BUILD_STAGE}/${ACTUAL_PACKAGE})" "$OUTPUT_FILE"
+    # Add rpath to the bin to allow it to load  system libs too
+    install_name_tool -add_rpath "${DEFAULT_SYSTEM_LIBS}" "$OUTPUT_FILE"
+    install_name_tool -add_rpath "${ALT_SYSTEM_LIBS}" "$OUTPUT_FILE"
+
+    # Make the binaries capable of handling absolute paths
+    symredirect "$OUTPUT_FILE" > /dev/null
+    install_name_tool -change @loader_path/.jbroot/usr/lib/libvrootapi.dylib @rpath/libvrootapi.dylib "$OUTPUT_FILE"
 
     # Determine entitlements file to use
     ENTITLEMENTS_FILE="${SIGN_ENTITLEMENTS:-$DEFAULT_ENTITLEMENTS}"
 
     # Use ldid and fastPathSign for signing
     ldid -S"${ENTITLEMENTS_FILE}" "$OUTPUT_FILE"
-
+    
     # Fast path signing
     /basebin/fastPathSign "$(jbroot $OUTPUT_FILE)"
 fi
