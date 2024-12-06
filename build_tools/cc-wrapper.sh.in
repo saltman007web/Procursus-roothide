@@ -7,6 +7,9 @@ DEFAULT_SYSTEM_LIBS=@DEFAULT_SYSTEM_LIBS@ # path to ${MEMO_PREFIX}${MEMO_SUB_PRE
 ALT_SYSTEM_LIBS=@ALT_SYSTEM_LIBS@ # path to ${MEMO_PREFIX}${MEMO_SUB_PREFIX}/local/lib
 ACTUAL_PACKAGE=@ACTUAL_PACKAGE@
 
+# Cache file for install names
+CACHE_FILE="${BUILD_STAGE}/${ACTUAL_PACKAGE}/.install_name_cache"
+
 # Parse options to identify an executable
 IS_EXECUTABLE=true
 OUTPUT_FILE="a.out"  # Default value if -o is not specified
@@ -36,7 +39,9 @@ for arg in "$@"; do
             elif [ "$INSTALL_NAME_FLAG" = true ]; then
                 # Replace the install_name value with the desired format
                 INSTALL_NAME_FLAG=false
+                ORIGINAL_INSTALL_NAME="$arg"
                 MODIFIED_INSTALL_NAME="@rpath/${arg}"
+                echo "${MODIFIED_INSTALL_NAME} ${ORIGINAL_INSTALL_NAME}" >> "$CACHE_FILE"
                 MODIFIED_ARGS+=("$MODIFIED_INSTALL_NAME")
             else
                 MODIFIED_ARGS+=("$arg")
@@ -53,7 +58,7 @@ fi
 # Check if the output is an executable and sign it
 if [ "$IS_EXECUTABLE" = true ] && [ -x "$OUTPUT_FILE" ]; then
     # Add rpath to binary to allow it to load package's lib from stage dir
-    install_name_tool -add_rpath "$(jbroot ${BUILD_STAGE}/${ACTUAL_PACKAGE})" "$OUTPUT_FILE"
+    install_name_tool -add_rpath "${BUILD_STAGE}/${ACTUAL_PACKAGE}" "$OUTPUT_FILE"
     # Add rpath to the bin to allow it to load  system libs too
     install_name_tool -add_rpath "${DEFAULT_SYSTEM_LIBS}" "$OUTPUT_FILE"
     install_name_tool -add_rpath "${ALT_SYSTEM_LIBS}" "$OUTPUT_FILE"

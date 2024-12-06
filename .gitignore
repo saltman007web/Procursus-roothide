@@ -14,5 +14,5 @@ logs/
 .DS_Store
 *.p12
 
-build_tools/cc-wrapper.sh
-build_tools/cxx-wrapper.sh
+build_tools/*cc-wrapper.sh
+build_tools/*cxx-wrapper.sh

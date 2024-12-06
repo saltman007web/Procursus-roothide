@@ -534,8 +534,8 @@ endif # ($(MEMO_QUIET),1)
 ON_IOS := 1
 TARGET_SYSROOT  ?= /usr/share/SDKs/$(BARE_PLATFORM).sdk
 MACOSX_SYSROOT  ?= /usr/share/SDKs/MacOSX.sdk
-CC              := $(BUILD_TOOLS)/cc-wrapper.sh
-CXX             := $(BUILD_TOOLS)/cxx-wrapper.sh
+CC              := $(BUILD_TOOLS)/$@-cc-wrapper.sh
+CXX             := $(BUILD_TOOLS)/$@-cxx-wrapper.sh
 CPP             != command -v cc
 CPP             := $(CPP) -E
 PATH            := /usr/bin:$(PATH)
@@ -965,10 +965,17 @@ AFTER_BUILD = \
 			fi; \
 		done; \
 	fi; \
+	CACHE_FILE=$(BUILD_STAGE)/$@/.install_name_cache; \
+	while IFS=' ' read -r MODIFIED_INSTALL_NAME ORIGINAL_INSTALL_NAME; do \
+		install_name_tool -id "$$ORIGINAL_INSTALL_NAME" "$(BUILD_STAGE)/$@/$$ORIGINAL_INSTALL_NAME"; \
+	done < "$${CACHE_FILE}"; \
 	for file in $$(find $(BUILD_STAGE)/$$pkg -type f -exec sh -c "file -ib '{}' | grep -q 'x-mach-binary; charset=binary'" \; -print); do \
 		if [ $${file\#\#*.} != "a" ] && [ $${file\#\#*.} != "dSYM" ]; then \
 			chmod +w $$file; echo "some packages may be installed into the BUILD_STAGE with 0555 permission, for example: berkeleydb" > /dev/null; \
-			$(I_N_T) -delete_rpath "$(shell jbroot)$(MEMO_SUB_PREFIX)/lib" $$file; \
+			$(I_N_T) -delete_rpath "$(shell jbroot $(BUILD_STAGE))/$$pkg" $$file; \
+			$(I_N_T) -delete_rpath "$(shell jbroot /usr/lib)" $$file; \
+			$(I_N_T) -delete_rpath "$(shell jbroot /usr/local/lib)" $$file; \
+			$(I_N_T) -change @rpath/libvrootapi.dylib @loader_path/.jbroot/usr/lib/libvrootapi.dylib $$file; \
 			$(I_N_T) -add_rpath "$(MEMO_LINK_PREFIX)$(MEMO_SUB_PREFIX)$(MEMO_ALT_PREFIX)/lib" $$file; \
 			$(I_N_T) -add_rpath "$(MEMO_LINK_PREFIX)$(MEMO_SUB_PREFIX)/lib" $$file; \
 			if [ ! -z "$(3)" ]; then \
@@ -1557,12 +1564,61 @@ endif
 	echo "$(BUILD_STRAP)/$${BOOTSTRAP}"
 endif # ($(MEMO_ROOTLESS),)
 
+define IOS_PRE_ACTIONS
+	sed -i "s|@ACTUAL_PACKAGE@|$*|" $(BUILD_TOOLS)/cc-wrapper.sh > $(BUILD_TOOLS)/$*-cc-wrapper.sh
+	sed -i "s|@ACTUAL_PACKAGE@|$*|" $(BUILD_TOOLS)/cxx-wrapper.sh > $(BUILD_TOOLS)/$*-cxx-wrapper.sh
+	rm -f $(BUILD_WORK)/$*/.install_name_cache
+endef
+
 %-package: FAKEROOT=fakeroot -i $(BUILD_STAGE)/.fakeroot_$$(echo $@ | sed 's/\(.*\)-package/\1/') -s $(BUILD_STAGE)/.fakeroot_$$(echo $@ | sed 's/\(.*\)-package/\1/') --
 %-package: .SHELLFLAGS=-O extglob -c
+
+ifeq ($(ON_IOS), 1)
+# Dedurre automaticamente la directory dei file .mk
+MK_DIR := $(dir $(firstword $(MAKEFILE_LIST)))/makefiles
+
+# Funzione per estrarre dipendenze dal file .mk
+define get_deps_from_file
+$(shell target="$*"; \
+    awk -v target="$$target" \
+        'BEGIN { found=0; deps="" } \
+         $0 ~ "^"target":" { found++; deps=""; if (found == 1) sub(/^[^:]+: */, "", $$0); if (found == 1) deps=$$0 } \
+         END { if (found >= 1) print deps }' \
+    $(MK_DIR)/$*.mk | sed 's/\([^ ]\+\)/\1.build/g')
+endef
+# Funzione per estrarre la ricetta (i comandi) dal file .mk
+define get_recipe_from_file
+$(shell target="$*"; \
+    awk -v target="$$target" \
+        'BEGIN { found=0; cmds="" } \
+         /^'target':/ { found++; cmds="" } \
+         found == 1 && /^[ \t]/ { cmds = cmds $$0 "\n" } \
+         END { if (found >= 1) print cmds }' \
+    $(MK_DIR)/$*.mk)
+endef
+
+# Regola generica per la trasformazione di regole in `.build`
+# Esegue i comandi comuni e richiama la regola originale.
+.SECONDEXPANSION:
+%-ios: setup %-setup $$(filter-out *setup*,$$(call get_deps_from_file,$*))
+	@echo "calculated deps for $*:"
+	@echo $(filter-out *setup*,$(call get_deps_from_file,$*))
+	$(IOS_PRE_ACTIONS)
+	@echo @echo "Executing commands for $*:"
+	@echo '$(call get_recipe_from_file,$*)'
+	$(call get_recipe_from_file,$*)
+
+# Trasformazione delle dipendenze delle regole speciali
+%-stage: %-ios
+	mkdir -p $(BUILD_DIST) $(BUILD_STAGE)
+	rm -f $(BUILD_STAGE)/.fakeroot_$*
+	touch $(BUILD_STAGE)/.fakeroot_$*
+else
 %-stage: %
 	mkdir -p $(BUILD_DIST) $(BUILD_STAGE)
 	rm -f $(BUILD_STAGE)/.fakeroot_$*
 	touch $(BUILD_STAGE)/.fakeroot_$*
+endif # ifeq ($(ON_IOS), 1)
 
 REPROJ=$(shell echo $@ | cut -f2- -d"-")
 REPROJ2=$(shell echo $(REPROJ) | sed 's/-package//' | sed 's/-setup//')
@@ -1803,7 +1859,7 @@ ifeq ($(ON_IOS),1)
 	sed -i "s|@ALT_SYSTEM_LIBS@|$(shell jbroot /usr/local/lib)|" $(BUILD_TOOLS)/cc-wrapper.sh
 	chmod +x $(BUILD_TOOLS)/cc-wrapper.sh
 
-	sed "s|@BUILD_STAGE@|$(shell jbroot $(BUILD_STAGE))|" < $(BUILD_TOOLS)/cxx-wrapper.sh.in > $(BUILD_TOOLS)/cxx-wrapper.sh
+	sed "s|@BUILD_STAGE@|$(BUILD_STAGE)|" < $(BUILD_TOOLS)/cxx-wrapper.sh.in > $(BUILD_TOOLS)/cxx-wrapper.sh
 	sed -i "s|@BUILD_MISC@|$(BUILD_MISC)|" $(BUILD_TOOLS)/cxx-wrapper.sh
 	sed -i "s|@DEFAULT_SYSTEM_LIBS@|$(shell jbroot /usr/lib)|" $(BUILD_TOOLS)/cxx-wrapper.sh # TODO make theese paths build-platform dependent
 	sed -i "s|@ALT_SYSTEM_LIBS@|$(shell jbroot /usr/local/lib)|" $(BUILD_TOOLS)/cxx-wrapper.sh
