@@ -14,5 +14,7 @@ logs/
 .DS_Store
 *.p12
 
+# ios-building related stuff
 build_tools/*cc-wrapper.sh
 build_tools/*cxx-wrapper.sh
+makefiles/ios-rules.mk
