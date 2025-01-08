@@ -1,6 +1,6 @@
 #! /usr/bin/python
 
-import sys, re
+import sys, re, os
 
 def get_pre_actions(package:str):
     return f"""
@@ -8,7 +8,8 @@ def get_pre_actions(package:str):
 	sed "s|@ACTUAL_PACKAGE@|{package}|" $(BUILD_TOOLS)/cxx-wrapper.sh > $(BUILD_TOOLS)/{package}-cxx-wrapper.sh
 	chmod +x $(BUILD_TOOLS)/{package}-cc-wrapper.sh
 	chmod +x $(BUILD_TOOLS)/{package}-cxx-wrapper.sh
-	rm -f $(BUILD_WORK)/{package}/.install_name_cache"""
+	mkdir -p $(BUILD_STAGE)/{package}/
+	rm -f $(BUILD_STAGE)/{package}/.install_name_cache"""
  
 def get_post_actions(package:str):
     return f"""\trm -f $(BUILD_TOOLS)/{package}-cc-wrapper.sh
@@ -65,30 +66,43 @@ else"""
 
 if __name__ == "__main__":
 
-    if len(sys.argv) != 2:
-        print(f"Usage: {sys.argv[0]} <package-name>")
-        exit(1)
+    # Iterate over files in directory
+    for name in os.listdir("makefiles"):
+        fileContent = ""
+        # Open file
+        with open(os.path.join("makefiles", name), "r") as f:
+            fileContent= f.read()
+            fileContent = f"{name[:-3]}: export ACTUAL_PACKAGE = {name[:-3]}\n\n" + fileContent
+            f.close()
+            
+        with open(os.path.join("makefiles", name), "w") as f:
+            f.write(fileContent)
+            f.close()
 
-    filesCache = {}
-    fileString = """"""
+    # if len(sys.argv) != 2:
+    #     print(f"Usage: {sys.argv[0]} <package-name>")
+    #     exit(1)
 
-    # Calc the dependencies
-    deps = calc_deps(sys.argv[1], [], filesCache)
-    toBuild = [sys.argv[1]] + deps
+    # filesCache = {}
+    # fileString = """"""
 
-    # Build the .mk file
-    for package in toBuild:
-        fileString += get_check_if_already_built(package)
-        fileString += '\n'
-        fileString += get_modified_header(get_header(package, filesCache), package)
-        fileString += get_pre_actions(package)
-        fileString += '\n'
-        fileString += get_recipe(package, filesCache)
-        fileString += get_post_actions(package)
-        fileString += '\n'
-        fileString += "endif\n\n"
+    # # Calc the dependencies
+    # deps = calc_deps(sys.argv[1], [], filesCache)
+    # toBuild = [sys.argv[1]] + deps
 
-    # Save to file
-    file = open("makefiles/ios-rules.mk", "w")
-    file.write(fileString)
-    file.close()
+    # # Build the .mk file
+    # for package in toBuild:
+    #     fileString += get_check_if_already_built(package)
+    #     fileString += '\n'
+    #     fileString += get_modified_header(get_header(package, filesCache), package)
+    #     fileString += get_pre_actions(package)
+    #     fileString += '\n'
+    #     fileString += get_recipe(package, filesCache)
+    #     fileString += get_post_actions(package)
+    #     fileString += '\n'
+    #     fileString += "endif\n\n"
+
+    # # Save to file
+    # file = open("makefiles/ios-rules.mk", "w")
+    # file.write(fileString)
+    # file.close()

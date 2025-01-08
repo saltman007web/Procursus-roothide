@@ -534,8 +534,8 @@ endif # ($(MEMO_QUIET),1)
 ON_IOS := 1
 TARGET_SYSROOT  ?= /usr/share/SDKs/$(BARE_PLATFORM).sdk
 MACOSX_SYSROOT  ?= /usr/share/SDKs/MacOSX.sdk
-CC              := $(BUILD_TOOLS)/$@-cc-wrapper.sh
-CXX             := $(BUILD_TOOLS)/$@-cxx-wrapper.sh
+CC              := $(BUILD_TOOLS)/cc-wrapper.sh
+CXX             := $(BUILD_TOOLS)/cxx-wrapper.sh
 CPP             != command -v cc
 CPP             := $(CPP) -E
 PATH            := /usr/bin:$(PATH)
@@ -951,7 +951,6 @@ AFTER_BUILD = \
 		pkg="$(2)"; \
 	else \
 		pkg="$@"; \
-		pkg=$${pkg::-4}; \
 	fi; \
 	if [ ! -z "$(MEMO_ROOTLESS)" ] && [ -d "$(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)" ]; then \
 		rm -f $(BUILD_STAGE)/$$pkg/._lib_cache && touch $(BUILD_STAGE)/$$pkg/._lib_cache; \
@@ -966,14 +965,15 @@ AFTER_BUILD = \
 			fi; \
 		done; \
 	fi; \
-	CACHE_FILE=$(BUILD_STAGE)/$$pkg/.install_name_cache; \
+	CACHE_FILE="$(BUILD_STAGE)/$${pkg}/.install_name_cache"; \
 	while IFS=' ' read -r MODIFIED_INSTALL_NAME ORIGINAL_INSTALL_NAME; do \
-		install_name_tool -id "$$ORIGINAL_INSTALL_NAME" "$(BUILD_STAGE)/$$pkg/$$ORIGINAL_INSTALL_NAME"; \
+		install_name_tool -id "$$ORIGINAL_INSTALL_NAME" "$(BUILD_STAGE)/$${pkg}/$$ORIGINAL_INSTALL_NAME"; \
 	done < "$${CACHE_FILE}"; \
 	for file in $$(find $(BUILD_STAGE)/$$pkg -type f -exec sh -c "file -ib '{}' | grep -q 'x-mach-binary; charset=binary'" \; -print); do \
 		if [ $${file\#\#*.} != "a" ] && [ $${file\#\#*.} != "dSYM" ]; then \
 			chmod +w $$file; echo "some packages may be installed into the BUILD_STAGE with 0555 permission, for example: berkeleydb" > /dev/null; \
 			$(I_N_T) -delete_rpath "$(shell jbroot $(BUILD_STAGE))/$$pkg" $$file; \
+			$(I_N_T) -delete_rpath "$(shell jbroot $(BUILD_BASE))" $$file; \
 			$(I_N_T) -delete_rpath "$(shell jbroot /usr/lib)" $$file; \
 			$(I_N_T) -delete_rpath "$(shell jbroot /usr/local/lib)" $$file; \
 			$(I_N_T) -change @rpath/libvrootapi.dylib @loader_path/.jbroot/usr/lib/libvrootapi.dylib $$file; \
@@ -1005,6 +1005,19 @@ AFTER_BUILD = \
 	fi; \
 	if [ "$(1)" = "copy" ]; then \
 		cp -af $(BUILD_STAGE)/$$pkg/* $(BUILD_BASE); \
+		for abs_file_path in $$(find "$(BUILD_STAGE)/$$pkg" -name "*.dylib"); do \
+			echo "considering $$abs_file_path"; \
+			rel_file_path=$$(realpath -s --relative-to="$(BUILD_STAGE)/$$pkg" "$$abs_file_path"); \
+			target_file="$(BUILD_BASE)/$${rel_file_path}"; \
+			if [ ! -L "$${target_file}" ]; then \
+				echo "found real file $${target_file}"; \
+				install_name=$$(otool -D "$(BUILD_BASE)/$${rel_file_path}" | tail -n 1); \
+				$(I_N_T) -id "@rpath$${install_name}" "$$target_file"; \
+				$(I_N_T) -add_rpath "$(shell jbroot $(BUILD_BASE))" "$$target_file"; \
+			else \
+				echo "found link $${target_file}"; \
+			fi; \
+		done; \
 	fi; \
 	[ -d $(BUILD_WORK)/$$pkg/ ] || mkdir $(BUILD_WORK)/$$pkg/; \
 	touch $(BUILD_WORK)/$$pkg/.build_complete; \
@@ -1571,7 +1584,12 @@ endif # ($(MEMO_ROOTLESS),)
 ifeq ($(ON_IOS), 1)
 
 %-ios:
-	@$(MAKE) -f ios-rules.mk
+	cp -a makefiles makefiles.backup
+	$(BUILD_TOOLS)/create-ios-rules.py
+	rm -f $(BUILD_STAGE)/*/.install_name_cache
+	-@$(MAKE) $*
+	mv makefiles.backup/* makefiles
+	rm -r makefiles.backup
 
 .PHONY: %-ios
 
@@ -1821,12 +1839,14 @@ endif
 
 ifeq ($(ON_IOS),1)
 	sed "s|@BUILD_STAGE@|$(shell jbroot $(BUILD_STAGE))|" < $(BUILD_TOOLS)/cc-wrapper.sh.in > $(BUILD_TOOLS)/cc-wrapper.sh
+	sed -i "s|@BUILD_BASE@|$(shell jbroot $(BUILD_BASE))|" $(BUILD_TOOLS)/cc-wrapper.sh
 	sed -i "s|@BUILD_MISC@|$(BUILD_MISC)|" $(BUILD_TOOLS)/cc-wrapper.sh
 	sed -i "s|@DEFAULT_SYSTEM_LIBS@|$(shell jbroot /usr/lib)|" $(BUILD_TOOLS)/cc-wrapper.sh # TODO make theese paths build-platform dependent
 	sed -i "s|@ALT_SYSTEM_LIBS@|$(shell jbroot /usr/local/lib)|" $(BUILD_TOOLS)/cc-wrapper.sh
 	chmod +x $(BUILD_TOOLS)/cc-wrapper.sh
 
-	sed "s|@BUILD_STAGE@|$(BUILD_STAGE)|" < $(BUILD_TOOLS)/cxx-wrapper.sh.in > $(BUILD_TOOLS)/cxx-wrapper.sh
+	sed "s|@BUILD_STAGE@|$(shell jbroot $(BUILD_STAGE))|" < $(BUILD_TOOLS)/cxx-wrapper.sh.in > $(BUILD_TOOLS)/cxx-wrapper.sh
+	sed -i "s|@BUILD_BASE@|$(shell jbroot $(BUILD_BASE))|" $(BUILD_TOOLS)/cxx-wrapper.sh
 	sed -i "s|@BUILD_MISC@|$(BUILD_MISC)|" $(BUILD_TOOLS)/cxx-wrapper.sh
 	sed -i "s|@DEFAULT_SYSTEM_LIBS@|$(shell jbroot /usr/lib)|" $(BUILD_TOOLS)/cxx-wrapper.sh # TODO make theese paths build-platform dependent
 	sed -i "s|@ALT_SYSTEM_LIBS@|$(shell jbroot /usr/local/lib)|" $(BUILD_TOOLS)/cxx-wrapper.sh

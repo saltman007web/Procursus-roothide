@@ -2,13 +2,15 @@
 
 # Required variables
 BUILD_STAGE=@BUILD_STAGE@
+BUILD_BASE=@BUILD_BASE@
 DEFAULT_ENTITLEMENTS="@BUILD_MISC@/entitlements/general.xml"  # Default entitlements file
 DEFAULT_SYSTEM_LIBS=@DEFAULT_SYSTEM_LIBS@ # path to ${MEMO_PREFIX}${MEMO_SUB_PREFIX}/lib
 ALT_SYSTEM_LIBS=@ALT_SYSTEM_LIBS@ # path to ${MEMO_PREFIX}${MEMO_SUB_PREFIX}/local/lib
-ACTUAL_PACKAGE=@ACTUAL_PACKAGE@
 
 # Cache file for install names
 CACHE_FILE="${BUILD_STAGE}/${ACTUAL_PACKAGE}/.install_name_cache"
+mkdir -p "${BUILD_STAGE}/${ACTUAL_PACKAGE}"
+touch "$CACHE_FILE"
 
 # Parse options to identify an executable
 IS_EXECUTABLE=true
@@ -30,6 +32,13 @@ for arg in "$@"; do
         -install_name)
             INSTALL_NAME_FLAG=true  # Signal that the next argument is the install_name value
             MODIFIED_ARGS+=("$arg")
+            ;;
+        -Wl,-install_name,*)
+            # Handle the -Wl,-install_name,some/path case
+            ORIGINAL_INSTALL_NAME="${arg#-Wl,-install_name,}"
+            MODIFIED_INSTALL_NAME="@rpath/${ORIGINAL_INSTALL_NAME}"
+            echo "${MODIFIED_INSTALL_NAME} ${ORIGINAL_INSTALL_NAME}" >> "$CACHE_FILE"
+            MODIFIED_ARGS+=("-Wl,-install_name,${MODIFIED_INSTALL_NAME}")
             ;;
         *)
             if [ "$OUTPUT_FILE_NEXT" = true ]; then
@@ -57,8 +66,10 @@ fi
 
 # Check if the output is an executable and sign it
 if [ "$IS_EXECUTABLE" = true ] && [ -x "$OUTPUT_FILE" ]; then
-    # Add rpath to binary to allow it to load package's lib from stage dir
+    # Add rpath to the bin to allow it to load package's lib from stage dir
     install_name_tool -add_rpath "${BUILD_STAGE}/${ACTUAL_PACKAGE}" "$OUTPUT_FILE"
+    # Add rpath to the bin to allow it to load build_base libs
+    install_name_tool -add_rpath "${BUILD_BASE}" "$OUTPUT_FILE"
     # Add rpath to the bin to allow it to load  system libs too
     install_name_tool -add_rpath "${DEFAULT_SYSTEM_LIBS}" "$OUTPUT_FILE"
     install_name_tool -add_rpath "${ALT_SYSTEM_LIBS}" "$OUTPUT_FILE"
