@@ -14,33 +14,37 @@ jobs:
           - '3.11'
       max-parallel: 5
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
       
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
+        architecture: 'x64'  # Ensures amd64 compatibility
         
     - name: Add conda to system path
       run: |
         echo $CONDA/bin >> $GITHUB_PATH
-
+    
     - name: Install dependencies
       run: |
         conda env update --file environment.yml --name base
-
+    
     - name: Lint with flake8
       run: |
         conda install --yes flake8
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics || true
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-
+    
     - name: Test with pytest
       run: |
         conda install --yes pytest
         pytest || true
-
-    - name: py-package-publish
+    
+    - name: Publish Python Package
       uses: mariamrf/py-package-publish-action@v1.1.0
       with:
-        python_version: '3.7.0'       
+        python_version: '3.8'  # Updated to Python 3.8
+        architecture: 'amd64'  # Added compatibility for amd64
+
