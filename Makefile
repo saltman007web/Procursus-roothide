@@ -97,6 +97,7 @@ DEB_ARCH              := iphoneos-arm
 GNU_HOST_TRIPLE       := aarch64-apple-darwin
 PLATFORM_VERSION_MIN  := -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
 RUST_TARGET           := aarch64-apple-ios
+GOLANG_OS             := ios
 LLVM_TARGET           := arm64-apple-ios$(IPHONEOS_DEPLOYMENT_TARGET)
 MEMO_ROOTFS           ?=
 MEMO_PREFIX           ?=
@@ -117,6 +118,7 @@ DEB_ARCH              := iphoneos-arm64
 GNU_HOST_TRIPLE       := aarch64-apple-darwin
 PLATFORM_VERSION_MIN  := -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
 RUST_TARGET           := aarch64-apple-ios
+GOLANG_OS             := ios
 LLVM_TARGET           := arm64-apple-ios$(IPHONEOS_DEPLOYMENT_TARGET)
 MEMO_ROOTFS           ?=
 MEMO_PREFIX           ?= /var/jb
@@ -137,6 +139,7 @@ DEB_ARCH              := iphoneos-arm64e
 GNU_HOST_TRIPLE       := aarch64-apple-darwin
 PLATFORM_VERSION_MIN  := -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
 RUST_TARGET           := aarch64-apple-ios
+GOLANG_OS             := ios
 LLVM_TARGET           := arm64-apple-ios$(IPHONEOS_DEPLOYMENT_TARGET)
 MEMO_ROOTFS           ?= /rootfs
 MEMO_PREFIX           ?=
@@ -157,6 +160,7 @@ DEB_ARCH              := iphoneos-arm64e
 GNU_HOST_TRIPLE       := aarch64-apple-darwin
 PLATFORM_VERSION_MIN  := -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
 RUST_TARGET           := aarch64-apple-ios
+GOLANG_OS             := ios
 LLVM_TARGET           := arm64e-apple-ios$(IPHONEOS_DEPLOYMENT_TARGET)
 MEMO_ROOTFS           ?=
 MEMO_PREFIX           ?= /var/jb
@@ -177,6 +181,7 @@ DEB_ARCH              := iphoneos-arm64e
 GNU_HOST_TRIPLE       := aarch64-apple-darwin
 PLATFORM_VERSION_MIN  := -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
 RUST_TARGET           := aarch64-apple-ios
+GOLANG_OS             := ios
 LLVM_TARGET           := arm64e-apple-ios$(IPHONEOS_DEPLOYMENT_TARGET)
 MEMO_ROOTFS           ?= /rootfs
 MEMO_PREFIX           ?=
@@ -196,6 +201,7 @@ DEB_ARCH              := iphoneos-arm64e
 GNU_HOST_TRIPLE       := aarch64-apple-darwin
 PLATFORM_VERSION_MIN  := -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
 RUST_TARGET           := aarch64-apple-ios
+GOLANG_OS             := ios
 LLVM_TARGET           := arm64e-apple-ios$(IPHONEOS_DEPLOYMENT_TARGET)
 MEMO_ROOTFS           ?=
 MEMO_PREFIX           ?=
@@ -215,6 +221,7 @@ DEB_ARCH              := iphoneos-arm
 GNU_HOST_TRIPLE       := armv7-apple-darwin
 PLATFORM_VERSION_MIN  := -miphoneos-version-min=$(IPHONEOS_DEPLOYMENT_TARGET)
 RUST_TARGET           := armv7-apple-ios
+GOLANG_OS             := ios
 LLVM_TARGET           := armv7-apple-ios$(IPHONEOS_DEPLOYMENT_TARGET)
 MEMO_ROOTFS           ?=
 MEMO_PREFIX           ?=
@@ -234,6 +241,7 @@ DEB_ARCH              := appletvos-arm64
 GNU_HOST_TRIPLE       := aarch64-apple-darwin
 PLATFORM_VERSION_MIN  := -mappletvos-version-min=$(APPLETVOS_DEPLOYMENT_TARGET)
 RUST_TARGET           := aarch64-apple-tvos
+GOLANG_OS             := ios
 LLVM_TARGET           := arm64-apple-tvos$(APPLETVOS_DEPLOYMENT_TARGET)
 MEMO_ROOTFS           ?=
 MEMO_PREFIX           ?=
@@ -253,6 +261,7 @@ DEB_ARCH              := appletvos-arm64e
 GNU_HOST_TRIPLE       := aarch64-apple-darwin
 PLATFORM_VERSION_MIN  := -mappletvos-version-min=$(APPLETVOS_DEPLOYMENT_TARGET)
 RUST_TARGET           := aarch64-apple-tvos
+GOLANG_OS             := ios
 LLVM_TARGET           := arm64e-apple-tvos$(APPLETVOS_DEPLOYMENT_TARGET)
 MEMO_ROOTFS           ?=
 MEMO_PREFIX           ?=
@@ -291,6 +300,7 @@ DEB_ARCH              := bridgeos-arm64
 GNU_HOST_TRIPLE       := aarch64-apple-darwin
 PLATFORM_VERSION_MIN  := --target=arm64-apple-bridgeos$(BRIDGEOS_DEPLOYMENT_TARGET)
 RUST_TARGET           := aarch64-apple-bridgeos
+GOLANG_OS             := ios
 LLVM_TARGET           := arm64-apple-bridgeos$(BRIDGEOS_DEPLOYMENT_TARGET)
 MEMO_ROOTFS           ?=
 MEMO_PREFIX           ?=
@@ -309,7 +319,8 @@ PLATFORM              := watchos
 DEB_ARCH              := watchos-arm64-32
 GNU_HOST_TRIPLE       := aarch64-apple-darwin
 PLATFORM_VERSION_MIN  := -mwatchos-version-min=$(WATCHOS_DEPLOYMENT_TARGET)
-RUST_TARGET           := aarch64-apple-watchos
+RUST_TARGET           := arm64_32-apple-watchos
+GOLANG_OS             := ios
 LLVM_TARGET           := arm64_32-apple-watchos$(WATCHOS_DEPLOYMENT_TARGET)
 MEMO_ROOTFS           ?=
 MEMO_PREFIX           ?=
@@ -348,13 +359,14 @@ PLATFORM              := macosx
 DEB_ARCH              := darwin-arm64e
 GNU_HOST_TRIPLE       := aarch64-apple-darwin
 RUST_TARGET           := $(GNU_HOST_TRIPLE)
+GOLANG_OS             := darwin
 LLVM_TARGET           := arm64e-apple-macos$(MACOSX_DEPLOYMENT_TARGET)
 PLATFORM_VERSION_MIN  := -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
 MEMO_ROOTFS           ?=
 MEMO_PREFIX           ?= /opt/procursus
 MEMO_SUB_PREFIX       ?=
 MEMO_ALT_PREFIX       ?=
-MEMO_LINK_PREFIX      ?=
+MEMO_LINK_PREFIX      ?= $(MEMO_PREFIX)
 MEMO_LAUNCHCTL_PREFIX ?=
 GNU_PREFIX            := g
 ON_DEVICE_SDK_PATH    := /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
@@ -368,13 +380,14 @@ PLATFORM              := macosx
 DEB_ARCH              := darwin-arm64
 GNU_HOST_TRIPLE       := aarch64-apple-darwin
 RUST_TARGET           := $(GNU_HOST_TRIPLE)
+GOLANG_OS             := darwin
 LLVM_TARGET           := arm64-apple-macos$(MACOSX_DEPLOYMENT_TARGET)
 PLATFORM_VERSION_MIN  := -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
 MEMO_ROOTFS           ?=
 MEMO_PREFIX           ?= /opt/procursus
 MEMO_SUB_PREFIX       ?=
 MEMO_ALT_PREFIX       ?=
-MEMO_LINK_PREFIX      ?=
+MEMO_LINK_PREFIX      ?= $(MEMO_PREFIX)
 MEMO_LAUNCHCTL_PREFIX ?=
 GNU_PREFIX            := g
 ON_DEVICE_SDK_PATH    := /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
@@ -388,13 +401,14 @@ PLATFORM              := macosx
 DEB_ARCH              := darwin-amd64
 GNU_HOST_TRIPLE       := x86_64-apple-darwin
 RUST_TARGET           := $(GNU_HOST_TRIPLE)
+GOLANG_OS             := darwin
 LLVM_TARGET           := x86_64-apple-macos$(MACOSX_DEPLOYMENT_TARGET)
 PLATFORM_VERSION_MIN  := -mmacosx-version-min=$(MACOSX_DEPLOYMENT_TARGET)
 MEMO_ROOTFS           ?=
 MEMO_PREFIX           ?= /opt/procursus
 MEMO_SUB_PREFIX       ?=
 MEMO_ALT_PREFIX       ?=
-MEMO_LINK_PREFIX      ?=
+MEMO_LINK_PREFIX      ?= $(MEMO_PREFIX)
 MEMO_LAUNCHCTL_PREFIX ?=
 GNU_PREFIX            := g
 ON_DEVICE_SDK_PATH    := /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
@@ -410,10 +424,37 @@ ifneq ($(MEMO_QUIET),1)
 $(warning Building for $(BARE_PLATFORM) $(MEMO_ARCH) with CoreFoundation version $(MEMO_CFVER) and prefix $(MEMO_PREFIX))
 endif
 
+
+REPO_BASE      != dirname $(realpath $(firstword $(MAKEFILE_LIST)))
+# Root
+BUILD_ROOT     ?= $(PWD)
+# Downloaded source files
+BUILD_SOURCE   := $(BUILD_ROOT)/build_source
+# Base headers/libs (e.g. patched from SDK)
+BUILD_BASE     := $(BUILD_ROOT)/build_base/$(MEMO_TARGET)/$(MEMO_CFVER)
+# Dpkg info storage area
+BUILD_INFO     ?= $(REPO_BASE)/build_info
+# Miscellaneous Procursus files
+BUILD_MISC     ?= $(REPO_BASE)/build_misc
+# Patch storage area
+BUILD_PATCH    ?= $(REPO_BASE)/build_patch
+# Extracted source working directory
+BUILD_WORK     := $(BUILD_ROOT)/build_work/$(MEMO_TARGET)/$(MEMO_CFVER)
+# Bootstrap working area
+BUILD_STAGE    := $(BUILD_ROOT)/build_stage/$(MEMO_TARGET)/$(MEMO_CFVER)
+# Final output
+BUILD_DIST     := $(BUILD_ROOT)/build_dist/$(MEMO_TARGET)/$(MEMO_CFVER)/work/
+# Actual bootrap staging
+BUILD_STRAP    := $(BUILD_ROOT)/build_strap/$(MEMO_TARGET)/$(MEMO_CFVER)
+# Extra scripts for the buildsystem
+BUILD_TOOLS    ?= $(REPO_BASE)/build_tools
+
+
 ifeq ($(UNAME),Linux)
 ifneq ($(MEMO_QUIET),1)
 $(warning Building on GNU Linux)
 endif # ($(MEMO_QUIET),1)
+
 TARGET_SYSROOT  ?= $(HOME)/cctools/SDK/$(BARE_PLATFORM).sdk
 MACOSX_SYSROOT  ?= $(HOME)/cctools/SDK/MacOSX.sdk
 
@@ -486,15 +527,17 @@ CXXFLAGS_FOR_BUILD := $(CFLAGS_FOR_BUILD)
 ASFLAGS_FOR_BUILD  := $(CFLAGS_FOR_BUILD)
 LDFLAGS_FOR_BUILD  := $(CFLAGS_FOR_BUILD)
 
-else
+else # ($(shell sw_vers -productName),macOS)
 ifneq ($(MEMO_QUIET),1)
 $(warning Building on iOS)
 endif # ($(MEMO_QUIET),1)
+ON_IOS := 1
 TARGET_SYSROOT  ?= /usr/share/SDKs/$(BARE_PLATFORM).sdk
 MACOSX_SYSROOT  ?= /usr/share/SDKs/MacOSX.sdk
-CC              != command -v cc
-CXX             != command -v c++
-CPP             := $(CC) -E
+CC              := $(BUILD_TOOLS)/cc-wrapper.sh
+CXX             := $(BUILD_TOOLS)/cxx-wrapper.sh
+CPP             != command -v cc
+CPP             := $(CPP) -E
 PATH            := /usr/bin:$(PATH)
 
 CFLAGS_FOR_BUILD   := -arch $(shell arch) -miphoneos-version-min=$(shell sw_vers -productVersion)
@@ -503,7 +546,7 @@ CXXFLAGS_FOR_BUILD := $(CFLAGS_FOR_BUILD)
 ASFLAGS_FOR_BUILD  := $(CFLAGS_FOR_BUILD)
 LDFLAGS_FOR_BUILD  := $(CFLAGS_FOR_BUILD)
 
-endif
+endif # ($(shell sw_vers -productName),macOS)
 AR              != command -v ar
 LD              != command -v ld
 RANLIB          != command -v ranlib
@@ -515,14 +558,25 @@ OTOOL           != command -v otool
 I_N_T           != command -v install_name_tool
 LIBTOOL         != command -v libtool
 
-else
+else #ifeq ($(UNAME),Darwin)
 $(error Please use macOS, iOS, Linux, or FreeBSD to build)
 endif
 
+ifeq ($(ON_IOS),1)
+CC_FOR_BUILD  := $(CC) $(CFLAGS_FOR_BUILD)
+CPP_FOR_BUILD := $(CPP) $(CPPFLAGS_FOR_BUILD)
+CXX_FOR_BUILD := $(CXX) $(CXXFLAGS_FOR_BUILD)
+AR_FOR_BUILD  := $(shell command -v ar)
+RANLIB_FOR_BUILD := $(shell command -v ranlib)
+STRIP_FOR_BUILD := $(shell command -v strip)
+else
 CC_FOR_BUILD  := $(shell command -v cc) $(CFLAGS_FOR_BUILD)
 CPP_FOR_BUILD := $(shell command -v cc) -E $(CPPFLAGS_FOR_BUILD)
 CXX_FOR_BUILD := $(shell command -v c++) $(CXXFLAGS_FOR_BUILD)
 AR_FOR_BUILD  := $(shell command -v ar)
+RANLIB_FOR_BUILD := $(shell command -v ranlib)
+STRIP_FOR_BUILD := $(shell command -v strip)
+endif
 export CC_FOR_BUILD CPP_FOR_BUILD CXX_FOR_BUILD AR_FOR_BUILD
 
 DEB_MAINTAINER    ?= roothide <roothideDev@twitter>
@@ -534,30 +588,6 @@ MEMO_LDID_EXTRA_FLAGS     ?=
 MEMO_CODESIGN_EXTRA_FLAGS ?=
 
 LDID := ldid -Hsha256 -Cadhoc $(MEMO_LDID_EXTRA_FLAGS)
-
-REPO_BASE      != dirname $(realpath $(firstword $(MAKEFILE_LIST)))
-# Root
-BUILD_ROOT     ?= $(PWD)
-# Downloaded source files
-BUILD_SOURCE   := $(BUILD_ROOT)/build_source
-# Base headers/libs (e.g. patched from SDK)
-BUILD_BASE     := $(BUILD_ROOT)/build_base/$(MEMO_TARGET)/$(MEMO_CFVER)
-# Dpkg info storage area
-BUILD_INFO     ?= $(REPO_BASE)/build_info
-# Miscellaneous Procursus files
-BUILD_MISC     ?= $(REPO_BASE)/build_misc
-# Patch storage area
-BUILD_PATCH    ?= $(REPO_BASE)/build_patch
-# Extracted source working directory
-BUILD_WORK     := $(BUILD_ROOT)/build_work/$(MEMO_TARGET)/$(MEMO_CFVER)
-# Bootstrap working area
-BUILD_STAGE    := $(BUILD_ROOT)/build_stage/$(MEMO_TARGET)/$(MEMO_CFVER)
-# Final output
-BUILD_DIST     := $(BUILD_ROOT)/build_dist/$(MEMO_TARGET)/$(MEMO_CFVER)/work/
-# Actual bootrap staging
-BUILD_STRAP    := $(BUILD_ROOT)/build_strap/$(MEMO_TARGET)/$(MEMO_CFVER)
-# Extra scripts for the buildsystem
-BUILD_TOOLS    ?= $(REPO_BASE)/build_tools
 
 ifeq ($(DEBUG),1)
 OPTIMIZATION_FLAGS := -g -O0
@@ -638,6 +668,38 @@ MEMO_MANPAGE_SUFFIX    :=
 MEMO_MANPAGE_COMPCMD   := true
 endif
 
+ifeq ($(ON_IOS),1)
+
+DEFAULT_CMAKE_FLAGS := \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_CROSSCOMPILING=OFF \
+	-DCMAKE_SYSTEM_NAME=Darwin \
+	-DCMAKE_SYSTEM_PROCESSOR="aarch64-apple-darwin" \
+	-DCMAKE_C_FLAGS="$(CFLAGS)" \
+	-DCMAKE_CXX_FLAGS="$(CXXFLAGS)" \
+	-DCMAKE_FIND_ROOT_PATH="$(BUILD_BASE)" \
+	-DPKG_CONFIG_EXECUTABLE="$(BUILD_TOOLS)/cross-pkg-config" \
+	-DCMAKE_INSTALL_NAME_TOOL="$(I_N_T)" \
+	-DCMAKE_INSTALL_PREFIX="$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)" \
+	-DCMAKE_INSTALL_NAME_DIR="$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib" \
+	-DCMAKE_INSTALL_RPATH="$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)" \
+	-DCMAKE_INSTALL_SYSCONFDIR="$(MEMO_PREFIX)/etc" \
+	-DCMAKE_OSX_SYSROOT="$(TARGET_SYSROOT)" \
+	-DCMAKE_OSX_ARCHITECTURES="$(MEMO_ARCH)"
+
+DEFAULT_CONFIGURE_FLAGS := \
+	--build="aarch64-apple-darwin" \
+	--prefix=$(MEMO_PREFIX)$(MEMO_SUB_PREFIX) \
+	--localstatedir=$(MEMO_PREFIX)/var \
+	--sysconfdir=$(MEMO_PREFIX)/etc \
+	--bindir=$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/bin \
+	--mandir=$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/share/man \
+	--enable-silent-rules \
+	--disable-dependency-tracking \
+	--enable-shared \
+	--enable-static
+
+else
 DEFAULT_CMAKE_FLAGS := \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_CROSSCOMPILING=true \
@@ -662,6 +724,9 @@ BUILD_CONFIGURE_FLAGS := \
 	CC="$(CC_FOR_BUILD)" \
 	CXX="$(CXX_FOR_BUILD)" \
 	CPP="$(CPP_FOR_BUILD)" \
+	AR="$(AR_FOR_BUILD)" \
+	RANLIB="$(RANLIB_FOR_BUILD)" \
+	STRIP="$(STRIP_FOR_BUILD)" \
 	CFLAGS="$(CFLAGS_FOR_BUILD)" \
 	CXXFLAGS="$(CXXFLAGS_FOR_BUILD)" \
 	CPPFLAGS="$(CPPFLAGS_FOR_BUILD)" \
@@ -680,6 +745,8 @@ DEFAULT_CONFIGURE_FLAGS := \
 	--disable-dependency-tracking \
 	--enable-shared \
 	--enable-static
+
+endif # ifeq($(ON_IOS),1)
 
 DEFAULT_PERL_MAKE_FLAGS := \
 	INSTALLSITEARCH=$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib/perl5/$${PERL_MAJOR} \
@@ -786,7 +853,7 @@ CHECKSUM_VERIFY = if [ "$(1)" = "sha1" -o "$(1)" = "sha1sum" ]; then \
 			[ "$(3)" = "$$HASH" ] || (echo "$(2) - Invalid Hash" && exit 1); \
 		fi
 
-EXTRACT_TAR = -if [ ! -d $(BUILD_WORK)/$(3) ] || [ "$(4)" = "1" ]; then \
+EXTRACT_TAR = if [ ! -d $(BUILD_WORK)/$(3) ] || [ "$(4)" = "1" ]; then \
 		if [ -d $(BUILD_ROOT)/source-repo/$(1)_$(2) ]; then \
 			echo "using patched source: $(1) $(2)"; \
 			mkdir -p $(BUILD_WORK)/$(3); \
@@ -797,7 +864,7 @@ EXTRACT_TAR = -if [ ! -d $(BUILD_WORK)/$(3) ] || [ "$(4)" = "1" ]; then \
 			cp -a $(BUILD_ROOT)/source-temp/$(1)_$(2)/. $(BUILD_WORK)/$(3); \
 		else \
 			cd $(BUILD_WORK) && \
-			tar -xf $(BUILD_SOURCE)/$(1) && \
+			tar -xf $(BUILD_SOURCE)/$(1) || exit 1 && \
 			mkdir -p $(3); \
 			cp -a $(2)/. $(3); \
 	 		cp -a $(2)/. $(BUILD_ROOT)/source-temp/$(1)_$(2); \
@@ -807,13 +874,15 @@ EXTRACT_TAR = -if [ ! -d $(BUILD_WORK)/$(3) ] || [ "$(4)" = "1" ]; then \
 
 DOWNLOAD_FILE = if [ ! -f "$(1)" ]; then \
 					echo "Downloading $(2) => $(1)"; \
+					TEMP_FILE=$$(mktemp); \
 					if [ -z "$$LIST" ]; then \
 						$(CURL) --output \
-							$(1) $(2) ; \
+							$$TEMP_FILE $(2) || exit 1; \
 					else \
 						$(CURL) --output \
-							$(1) $(2) ; \
+							$$TEMP_FILE $(2) || exit 1; \
 					fi; \
+					mkdir -p $$(dirname "$(1)") && mv $$TEMP_FILE "$(1)"; \
 				else echo "$(1) already downloaded."; fi
 
 DOWNLOAD_FILES = LIST="$$(echo $(2))"; \
@@ -831,6 +900,18 @@ DO_PATCH    = cd $(BUILD_PATCH)/$(1); \
 	done
 
 ifeq (,$(findstring darwin,$(MEMO_TARGET)))
+ifeq ($(ON_IOS),1)
+SIGN = 	for file in $$(find $(BUILD_DIST)/$(1) -type f -exec sh -c "file -ib '{}' | grep -q 'x-mach-binary; charset=binary'" \; -print); do \
+			if [ $${file\#\#*.} != "a" ]; then \
+				$(LDID) -s $$file; \
+				if [ $${file\#\#*.} = "dylib" ] || [ $${file\#\#*.} = "bundle" ] || [ $${file\#\#*.} = "so" ]; then \
+					$(LDID) -S $$file; \
+				else \
+					$(LDID) -S$(BUILD_MISC)/entitlements/$(2) $$file; \
+				fi; \
+			fi; \
+		done
+else
 SIGN = 	for file in $$(find $(BUILD_DIST)/$(1) -type f -exec sh -c "file -ib '{}' | grep -q 'x-mach-binary; charset=binary'" \; -print); do \
 			if [ $${file\#\#*.} != "a" ]; then \
 				if [ $${file\#\#*.} = "dylib" ] || [ $${file\#\#*.} = "bundle" ] || [ $${file\#\#*.} = "so" ]; then \
@@ -840,6 +921,7 @@ SIGN = 	for file in $$(find $(BUILD_DIST)/$(1) -type f -exec sh -c "file -ib '{}
 				fi; \
 			fi; \
 		done
+endif
 else
 SIGN = 	CODESIGN_FLAGS="--sign $(CODESIGN_IDENTITY) --force --deep "; \
 		if [ "$(CODESIGN_IDENTITY)" != "-" ]; then \
@@ -863,6 +945,84 @@ endif
 #
 ###
 
+ifeq ($(ON_IOS),1)
+AFTER_BUILD = \
+	if [ ! -z "$(2)" ]; then \
+		pkg="$(2)"; \
+	else \
+		pkg="$@"; \
+	fi; \
+	if [ ! -z "$(MEMO_ROOTLESS)" ] && [ -d "$(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)" ]; then \
+		rm -f $(BUILD_STAGE)/$$pkg/._lib_cache && touch $(BUILD_STAGE)/$$pkg/._lib_cache; \
+		for file in $$(find $(BUILD_STAGE)/$$pkg -type f -exec sh -c "file -ib '{}' | grep -q 'x-mach-binary; charset=binary'" \; -print); do \
+			if [ $${file\#\#*.} != "a" ] && [ $${file\#\#*.} != "dSYM" ]; then \
+				INSTALL_NAME=$$($(OTOOL) -D $$file | grep -v -e ":$$" -e "^Archive :" | head -n1); \
+				if [ ! -z "$$INSTALL_NAME" ] && ( ( echo "$$INSTALL_NAME" | grep -q ^$(MEMO_PREFIX)/ ) || ! ( echo "$$INSTALL_NAME" | grep -q / ) ); then \
+					chmod +w $$file; echo "some packages may be installed into the BUILD_STAGE with 0555 permission, for example: berkeleydb" > /dev/null; \
+					$(I_N_T) -id @rpath/$$(basename $$INSTALL_NAME) $$file; \
+					echo "$$INSTALL_NAME" >> $(BUILD_STAGE)/$$pkg/._lib_cache; \
+				fi; \
+			fi; \
+		done; \
+	fi; \
+	CACHE_FILE="$(BUILD_STAGE)/$${pkg}/.install_name_cache"; \
+	while IFS=' ' read -r MODIFIED_INSTALL_NAME ORIGINAL_INSTALL_NAME; do \
+		install_name_tool -id "$$ORIGINAL_INSTALL_NAME" "$(BUILD_STAGE)/$${pkg}/$$ORIGINAL_INSTALL_NAME"; \
+	done < "$${CACHE_FILE}"; \
+	for file in $$(find $(BUILD_STAGE)/$$pkg -type f -exec sh -c "file -ib '{}' | grep -q 'x-mach-binary; charset=binary'" \; -print); do \
+		if [ $${file\#\#*.} != "a" ] && [ $${file\#\#*.} != "dSYM" ]; then \
+			chmod +w $$file; echo "some packages may be installed into the BUILD_STAGE with 0555 permission, for example: berkeleydb" > /dev/null; \
+			$(I_N_T) -delete_rpath "$(shell jbroot $(BUILD_STAGE))/$$pkg" $$file; \
+			$(I_N_T) -delete_rpath "$(shell jbroot $(BUILD_BASE))" $$file; \
+			$(I_N_T) -delete_rpath "$(shell jbroot /usr/lib)" $$file; \
+			$(I_N_T) -delete_rpath "$(shell jbroot /usr/local/lib)" $$file; \
+			$(I_N_T) -change @rpath/libvrootapi.dylib @loader_path/.jbroot/usr/lib/libvrootapi.dylib $$file; \
+			$(I_N_T) -add_rpath "$(MEMO_LINK_PREFIX)$(MEMO_SUB_PREFIX)$(MEMO_ALT_PREFIX)/lib" $$file; \
+			$(I_N_T) -add_rpath "$(MEMO_LINK_PREFIX)$(MEMO_SUB_PREFIX)/lib" $$file; \
+			if [ ! -z "$(3)" ]; then \
+				$(I_N_T) -add_rpath "$(3)" $$file; \
+			fi; \
+			if [ -f $(BUILD_STAGE)/$$pkg/._lib_cache ]; then \
+				cat $(BUILD_STAGE)/$$pkg/._lib_cache | while read line; do \
+					$(I_N_T) -change $$line @rpath/$$(basename $$line) $$file; \
+				done; \
+			fi; \
+			if [ "$(DEBUG)" != "1" ]; then $(STRIP) -x $$file; fi; \
+			if [ ! -z "$(findstring roothide,$(MEMO_TARGET))" ];then \
+				if [ -z "$(4)" ]; then symredirect $$file || exit 1; fi; \
+			fi; \
+		fi; \
+	done; \
+	rm -f $(BUILD_STAGE)/$$pkg/._lib_cache; \
+	find $(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/share/man -type f -name '*.gz$$' -exec gunzip '{}' \; 2> /dev/null; \
+	find $(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/share/man -type f -name '*.xz$$' -exec unxz '{}' \; 2> /dev/null; \
+	find $(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/share/man -type f -name '*.zst$$' -exec unzstd '{}' \; 2> /dev/null; \
+	if [ "$(MEMO_NO_DOC_COMPRESS)" != 1 ]; then \
+		find $(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/share/man -type f -exec $(MEMO_MANPAGE_COMPCMD) $(MEMO_MANPAGE_COMPFLGS) '{}' \; 2> /dev/null; \
+		find $(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/share/man -type l -exec bash -c '$(LN_S) $$(readlink "{}" | sed -e "s/\.gz$$//" -e "s/\.xz$$//" -e "s/\.zst$$//")$(MEMO_MANPAGE_SUFFIX) "{}"$(MEMO_MANPAGE_SUFFIX); rm -f "{}"' \; -delete 2> /dev/null; \
+	else \
+		find $(BUILD_STAGE)/$$pkg/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/share/man -type l -exec bash -c '$(LN_S) $$(readlink "{}" | sed -e "s/\.gz$$//" -e "s/\.xz$$//" -e "s/\.zst$$//") "{}"' \; 2> /dev/null; \
+	fi; \
+	if [ "$(1)" = "copy" ]; then \
+		cp -af $(BUILD_STAGE)/$$pkg/* $(BUILD_BASE); \
+		for abs_file_path in $$(find "$(BUILD_STAGE)/$$pkg" -name "*.dylib"); do \
+			echo "considering $$abs_file_path"; \
+			rel_file_path=$$(realpath -s --relative-to="$(BUILD_STAGE)/$$pkg" "$$abs_file_path"); \
+			target_file="$(BUILD_BASE)/$${rel_file_path}"; \
+			if [ ! -L "$${target_file}" ]; then \
+				echo "found real file $${target_file}"; \
+				install_name=$$(otool -D "$(BUILD_BASE)/$${rel_file_path}" | tail -n 1); \
+				$(I_N_T) -id "@rpath$${install_name}" "$$target_file"; \
+				$(I_N_T) -add_rpath "$(shell jbroot $(BUILD_BASE))" "$$target_file"; \
+			else \
+				echo "found link $${target_file}"; \
+			fi; \
+		done; \
+	fi; \
+	[ -d $(BUILD_WORK)/$$pkg/ ] || mkdir $(BUILD_WORK)/$$pkg/; \
+	touch $(BUILD_WORK)/$$pkg/.build_complete; \
+	find $(BUILD_BASE) -name '*.la' \( -type f -o -type l \) -delete
+else
 AFTER_BUILD = \
 	if [ ! -z "$(2)" ]; then \
 		pkg="$(2)"; \
@@ -917,7 +1077,7 @@ AFTER_BUILD = \
 	[ -d $(BUILD_WORK)/$$pkg/ ] || mkdir $(BUILD_WORK)/$$pkg/; \
 	touch $(BUILD_WORK)/$$pkg/.build_complete; \
 	find $(BUILD_BASE) -name '*.la' \( -type f -o -type l \) -delete
-
+endif
 PACK = \
 	if [ ! -z "$(findstring roothide,$(MEMO_TARGET))" ];then \
 		for file in $$(find $(BUILD_DIST)/$(1) -type f -exec sh -c "file -b '{}' | grep 'Mach-O' | grep -q 'executable'" \; -print); do \
@@ -1021,12 +1181,12 @@ PACK = \
 	cp -a $(BUILD_DIST)/$(1) $(BUILD_ROOT)/pack-cache/$(MEMO_TARGET)/$(MEMO_CFVER)/; \
 	$(FAKEROOT) $(DPKG_DEB) -b $(BUILD_DIST)/$(1) $(BUILD_DIST)/../$$(echo $@ | sed 's/-package//')/$$(grep Package: $(BUILD_DIST)/$(1)/DEBIAN/control | cut -f2 -d ' ')_$($(2))_$$(grep Architecture: $(BUILD_DIST)/$(1)/DEBIAN/control | cut -f2 -d ' ').deb
 
-GITHUB_ARCHIVE = -if [ "x$(5)" != "x" ]; then \
-					[ ! -f "$(BUILD_SOURCE)/$(5)-$(3).tar.gz" ] && \
+GITHUB_ARCHIVE = if [ "x$(5)" != "x" ]; then \
+					([ ! -f "$(BUILD_SOURCE)/$(5)-$(3).tar.gz" ] || exit 0) && \
 						$(call DOWNLOAD_FILE,$(BUILD_SOURCE)/$(5)-$(3).tar.gz, \
 							https://github.com/$(1)/$(2)/archive/$(4).tar.gz); \
 				else \
-					[ ! -f "$(BUILD_SOURCE)/$(2)-$(3).tar.gz" ] && \
+					([ ! -f "$(BUILD_SOURCE)/$(2)-$(3).tar.gz" ] || exit 0) && \
 						$(call DOWNLOAD_FILE,$(BUILD_SOURCE)/$(2)-$(3).tar.gz, \
 							https://github.com/$(1)/$(2)/archive/$(4).tar.gz); \
 				fi
@@ -1044,7 +1204,7 @@ GIT_CLONE = if [ ! -d "$(BUILD_WORK)/$(3)" ]; then \
 ifneq ($(call HAS_COMMAND,curl),1)
 $(error Install curl)
 else
-CURL := curl --silent -L --create-dirs
+CURL := curl --fail -L --create-dirs
 endif
 
 ifneq ($(call HAS_COMMAND,triehash),1)
@@ -1420,10 +1580,30 @@ endif # ($(MEMO_ROOTLESS),)
 
 %-package: FAKEROOT=fakeroot -i $(BUILD_STAGE)/.fakeroot_$$(echo $@ | sed 's/\(.*\)-package/\1/') -s $(BUILD_STAGE)/.fakeroot_$$(echo $@ | sed 's/\(.*\)-package/\1/') --
 %-package: .SHELLFLAGS=-O extglob -c
+
+ifeq ($(ON_IOS), 1)
+
+%-ios:
+	cp -a makefiles makefiles.backup
+	$(BUILD_TOOLS)/create-ios-rules.py
+	rm -f $(BUILD_STAGE)/*/.install_name_cache
+	-@$(MAKE) $*
+	mv makefiles.backup/* makefiles
+	rm -r makefiles.backup
+
+.PHONY: %-ios
+
+# Trasformazione delle dipendenze delle regole speciali
+%-stage: %-ios
+	mkdir -p $(BUILD_DIST) $(BUILD_STAGE)
+	rm -f $(BUILD_STAGE)/.fakeroot_$*
+	touch $(BUILD_STAGE)/.fakeroot_$*
+else
 %-stage: %
 	mkdir -p $(BUILD_DIST) $(BUILD_STAGE)
 	rm -f $(BUILD_STAGE)/.fakeroot_$*
 	touch $(BUILD_STAGE)/.fakeroot_$*
+endif # ifeq ($(ON_IOS), 1)
 
 REPROJ=$(shell echo $@ | cut -f2- -d"-")
 REPROJ2=$(shell echo $(REPROJ) | sed 's/-package//' | sed 's/-setup//')
@@ -1655,6 +1835,22 @@ endif
 	@cp -af $(BUILD_MISC)/roothide/roothide.h $(BUILD_BASE)/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/include/
 	@cp -af $(BUILD_MISC)/roothide/*.tbd $(BUILD_BASE)/$(MEMO_PREFIX)$(MEMO_SUB_PREFIX)/lib/
 
+endif
+
+ifeq ($(ON_IOS),1)
+	sed "s|@BUILD_STAGE@|$(shell jbroot $(BUILD_STAGE))|" < $(BUILD_TOOLS)/cc-wrapper.sh.in > $(BUILD_TOOLS)/cc-wrapper.sh
+	sed -i "s|@BUILD_BASE@|$(shell jbroot $(BUILD_BASE))|" $(BUILD_TOOLS)/cc-wrapper.sh
+	sed -i "s|@BUILD_MISC@|$(BUILD_MISC)|" $(BUILD_TOOLS)/cc-wrapper.sh
+	sed -i "s|@DEFAULT_SYSTEM_LIBS@|$(shell jbroot /usr/lib)|" $(BUILD_TOOLS)/cc-wrapper.sh # TODO make theese paths build-platform dependent
+	sed -i "s|@ALT_SYSTEM_LIBS@|$(shell jbroot /usr/local/lib)|" $(BUILD_TOOLS)/cc-wrapper.sh
+	chmod +x $(BUILD_TOOLS)/cc-wrapper.sh
+
+	sed "s|@BUILD_STAGE@|$(shell jbroot $(BUILD_STAGE))|" < $(BUILD_TOOLS)/cxx-wrapper.sh.in > $(BUILD_TOOLS)/cxx-wrapper.sh
+	sed -i "s|@BUILD_BASE@|$(shell jbroot $(BUILD_BASE))|" $(BUILD_TOOLS)/cxx-wrapper.sh
+	sed -i "s|@BUILD_MISC@|$(BUILD_MISC)|" $(BUILD_TOOLS)/cxx-wrapper.sh
+	sed -i "s|@DEFAULT_SYSTEM_LIBS@|$(shell jbroot /usr/lib)|" $(BUILD_TOOLS)/cxx-wrapper.sh # TODO make theese paths build-platform dependent
+	sed -i "s|@ALT_SYSTEM_LIBS@|$(shell jbroot /usr/local/lib)|" $(BUILD_TOOLS)/cxx-wrapper.sh
+	chmod +x $(BUILD_TOOLS)/cxx-wrapper.sh
 endif
 
 ifneq ($(MEMO_QUIET),1)

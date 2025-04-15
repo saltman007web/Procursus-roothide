@@ -8,8 +8,8 @@ else
 SUBPROJECTS += roothide
 endif
 
-ROOTHIDE_VERSION  := 0.0.8
-ROOTHIDE_COMMIT  := 9d98e57e91a689d342ade42085a7fb4c3f8f8891
+ROOTHIDE_VERSION  := 0.0.9
+ROOTHIDE_COMMIT  := 4564aea5d8883fda0b174791d3333b9383b91127
 DEB_ROOTHIDE_V    ?= $(ROOTHIDE_VERSION)
 export DEB_ROOTHIDE_V
 
@@ -97,7 +97,7 @@ roothide-package: roothide-stage
 	$(call SIGN,roothide-dev,general.xml)
 	
 	# roothide.mk Make .debs
-	$(call PACK,roothide-dev,DEB_ROOTHIDE_V,2)
+	$(call PACK,roothide-dev,DEB_ROOTHIDE_V)
 
 	# roothide.mk Build cleanup
 	rm -rf $(BUILD_DIST)/roothide{,-dev}

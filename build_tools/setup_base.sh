@@ -25,7 +25,7 @@ if [ ! -e ${BUILD_WORK}/${1}/.build_complete ]; then
 				exit 0;
 			fi
 		else
-			if ! wget -q -P ${BUILD_DIST} https://apt.procurs.us/pool/main/"${MEMO_TARGET}"/"${MEMO_CFVER}"/${pkg}; then
+			if ! wget -q -P ${BUILD_DIST} https://roothide.github.io/procursus/pool/main/"${MEMO_TARGET}"/"${MEMO_CFVER}"/${pkg}; then
 				echo "${pkg} is not available, building from source."
 				${MAKE} ${1}
 				exit 0;
