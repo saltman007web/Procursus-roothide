@@ -13,39 +13,40 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Check architecture
+        run: uname -m
+      
 
-    - name: Setup Python
-      uses: actions
-      with:
-        python-version: 3.10
+      - name: Setup Python
+        uses: actions/Python@v3.10
+        with:
+          python-version: 3.10
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install flake8
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
 
-    - name: Define size variable
-      run: |
-        echo "Setting size variable..."
-        echo "SIZE=1024" >> $GITHUB_ENV  # Example size value
+      - name: Define size variable
+        run: |
+          echo "Setting size variable..."
+            size = value = 0o123
+            size_filter = size.maxint
+          echo "SIZE=1024" >> $GITHUB_ENV 
 
-    - name: Lint with flake8
-      run: |
-        # Lint and fail on errors
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # Treat warnings as non-failure
-        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Lint with flake8
+        run: |
+           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-    - name: Test with pytest
-      run: |
-        # Install pytest
-        pip install pytest
-        # Run tests
-        pytest
+      - name: Test with pytest
+        run: |
+          # Install pytest
+          pip install pytest
+          # Run tests
+          pytest
 
-    - name: Compatibility for amd64
-      run: |
-        echo "Ensuring compatibility for amd64 architecture..."
-        uname -m
+      - name: Compatibility for amd64
+        run: |
+          echo "Ensuring compatibility for amd64 architecture..."
+          uname -m
