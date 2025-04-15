@@ -1,0 +1,7 @@
+name: my-environment
+channels:
+  - defaults
+dependencies:
+  - python=3.10
+  - flake8 
+  - pytest
