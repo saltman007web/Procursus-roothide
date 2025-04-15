@@ -39,3 +39,8 @@ jobs:
       run: |
         conda install --yes pytest
         pytest || true
+
+    - name: py-package-publish
+      uses: mariamrf/py-package-publish-action@v1.1.0
+      with:
+        python_version: '3.7.0'       
